@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gráficos</title>
+    <!-- Incluir la biblioteca de Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Gráfico de Ejemplo</h1>
+    <!-- Div para mostrar el gráfico -->
+    <div id="grafico"></div>
+
+    <script>
+        // Recupera los datos del gráfico desde Flask
+        var graphJSON = {{ graphJSON | tojson | safe }};
+
+        // Crea el gráfico usando Plotly
+        Plotly.newPlot('grafico', JSON.parse(graphJSON));
+    </script>
+</body>
+</html>
