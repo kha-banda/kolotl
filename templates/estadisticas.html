@@ -1,0 +1,307 @@
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl - Gestión de Usuarios{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+	<button id="generatePdfBtn" class="btn btn-danger mb-4">Generar PDF</button>
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Total Capturas</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="totalCaptures">0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-secondary mb-3">
+                <div class="card-header">Total Escorpiones</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="totalScorpions">0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Diversidad de Especies</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="speciesDiversity">0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Conteo por Especie</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="specimenBySpecies">0</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphs Section -->
+    <div class="mt-5">
+        <h3>Distribución de Capturas por Hábitat y Especie</h3>
+        <p>Estos gráficos muestran la distribución de capturas según el tipo de hábitat y el número de especímenes por especie. Esto ayuda a comprender el entorno en el que se encuentran las diferentes especies.</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Distribución de Hábitat</h5>
+                <canvas id="habitatChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h5>Conteo de Especies Capturadas</h5>
+                <canvas id="speciesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h3>Comparación de Capturas por Especie y Sexo</h3>
+        <p>Esta sección compara el número total de especímenes capturados por especie, así como la distribución de machos y hembras entre todas las capturas.</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Total de Especímenes por Especie</h5>
+                <canvas id="speciesChart1"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h5>Distribución por Género</h5>
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h3>Distribución de Estados de Desarrollo por Especie</h3>
+        <p>Selecciona una especie para ver la distribución de estados de desarrollo (adulto, juvenil, subadulto) en los especímenes capturados.</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label for="speciesSelect">Seleccionar Especie:</label>
+                <select id="speciesSelect" class="form-select">
+                    <!-- Species options will be dynamically loaded -->
+                </select>
+                <canvas id="spiderChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/get_captures')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalCaptures').innerText = data.statistics.total_captures;
+                document.getElementById('totalScorpions').innerText = data.statistics.total_scorpions;
+                document.getElementById('speciesDiversity').innerText = Object.keys(data.statistics.species_count).length;
+                document.getElementById('specimenBySpecies').innerText = Object.values(data.statistics.species_count).reduce((a, b) => a + b, 0);
+				   // Generate the PDF
+				   document.getElementById("generatePdfBtn").addEventListener("click", function() {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+
+                    // Add title
+                    pdf.setFontSize(16);
+                    pdf.text("Resumen de Capturas de Especies", 10, 10);
+                    pdf.setFontSize(12);
+                    pdf.text(`Total Capturas: ${data.statistics.total_captures}`, 10, 20);
+                    pdf.text(`Total Escorpiones: ${data.statistics.total_scorpions}`, 10, 30);
+                    pdf.text(`Diversidad de Especies: ${Object.keys(data.statistics.species_count).length}`, 10, 40);
+                    pdf.text(`Conteo por Especie: ${Object.values(data.statistics.species_count).reduce((a, b) => a + b, 0)}`, 10, 50);
+					
+                    // Add charts as images
+                     // Función para agregar imágenes de gráficos al PDF
+					function addChartImage(chartId, x, y) {
+						const chartCanvas = document.getElementById(chartId);
+						const chartImage = chartCanvas.toDataURL("image/png");
+						// Ajustar ancho y alto para que sean más grandes
+						const width = 150;  // Ajusta el ancho aquí
+						const height = 100; // Ajusta la altura aquí
+						pdf.addImage(chartImage, 'PNG', x, y, width, height);
+					}
+					pdf.setFontSize(20);
+					pdf.text("Estadisticas", 10, 80);
+					// Agregar gráficos
+					addChartImage('habitatChart', 10, 90);
+					pdf.addPage()
+					addChartImage('speciesChart', 10, 60);
+					addChartImage('speciesChart1', 10, 60);
+					pdf.addPage()
+					addChartImage('genderChart', 10, 60);
+					pdf.addPage()
+					addChartImage('spiderChart', 10, 60);
+					pdf.addPage()
+
+                    // Add a new page for the table
+                    pdf.addPage();
+                    pdf.setFontSize(16);
+                    pdf.text("Tabla de Capturas", 10, 10);
+
+                    // Create table
+                    const headers = ["Fecha", "Lugar", "Especie", "Adulto Macho", "Adulto Hembra", "Juvenil Macho", "Juvenil Hembra", "Subadulto Macho", "Subadulto Hembra"];
+                    const rows = data.captures.map(capture => [
+                        capture.locacion.estado +""+ capture.locacion.municipio,
+                        capture.fecha_captura,
+                        capture.escorpion,
+                        capture.adultomacho,
+                        capture.adultohembra,
+                        capture.juvenilmacho,
+                        capture.juvenilhembra,
+                        capture.subadultomacho,
+                        capture.subadultohembra
+                    ]);
+
+                    // Add table headers
+                    pdf.autoTable({
+                        head: [headers],
+                        body: rows,
+                        startY: 20,
+                    });
+
+                    // Save the PDF
+                    pdf.save("capturas_resumen.pdf");
+                });
+                new Chart(document.getElementById('habitatChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(data.statistics.habitats_count),
+                        datasets: [{
+                            data: Object.values(data.statistics.habitats_count),
+                            backgroundColor: ['#4CAF50', '#FFC107', '#03A9F4', '#E91E63'],
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                new Chart(document.getElementById('speciesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.statistics.species_count),
+                        datasets: [{
+                            data: Object.values(data.statistics.species_count),
+                            backgroundColor: '#2196F3'
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+
+                const speciesData = Object.keys(data.statistics.species_count).map(species => {
+                    const captures = data.captures.filter(capture => capture.escorpion === species);
+                    let totalSpecimens = 0;
+                    captures.forEach(capture => {
+                        totalSpecimens += capture.adultomacho + capture.adultohembra + capture.juvenilmacho + capture.juvenilhembra + capture.subadultomacho + capture.subadultohembra;
+                    });
+                    return totalSpecimens;
+                });
+
+                new Chart(document.getElementById('speciesChart1'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.statistics.species_count),
+                        datasets: [{
+                            label: 'Especímenes Capturados',
+                            data: speciesData,
+                            backgroundColor: '#2196F3'
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+
+                let totalMale = 0;
+                let totalFemale = 0;
+                data.captures.forEach(capture => {
+                    totalMale += capture.adultomacho + capture.juvenilmacho + capture.subadultomacho;
+                    totalFemale += capture.adultohembra + capture.juvenilhembra + capture.subadultohembra;
+                });
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Machos', 'Hembras'],
+                        datasets: [{
+                            label: 'Número de Especímenes',
+                            data: [totalMale, totalFemale],
+                            backgroundColor: ['#42A5F5', '#FF7043']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                const speciesSelect = document.getElementById('speciesSelect');
+                speciesSelect.add(new Option("Todas", "all"));
+                Object.keys(data.statistics.species_count).forEach(species => {
+                    speciesSelect.add(new Option(species, species));
+                });
+
+                let spiderChart;
+                function updateSpiderChart(species) {
+                    if (spiderChart) spiderChart.destroy();
+
+                    let totals = { adultomacho: 0, adultohembra: 0, juvenilmacho: 0, juvenilhembra: 0, subadultomacho: 0, subadultohembra: 0 };
+                    const filteredData = species === 'all' ? data.captures : data.captures.filter(capture => capture.escorpion === species);
+
+                    filteredData.forEach(capture => {
+                        totals.adultomacho += capture.adultomacho;
+                        totals.adultohembra += capture.adultohembra;
+                        totals.juvenilmacho += capture.juvenilmacho;
+                        totals.juvenilhembra += capture.juvenilhembra;
+                        totals.subadultomacho += capture.subadultomacho;
+                        totals.subadultohembra += capture.subadultohembra;
+                    });
+
+                    spiderChart = new Chart(document.getElementById('spiderChart'), {
+                        type: 'radar',
+                        data: {
+                            labels: ['Adultos Macho', 'Adultos Hembra', 'Juveniles Macho', 'Juveniles Hembra', 'Subadultos Macho', 'Subadultos Hembra'],
+                            datasets: [{
+                                label: `Distribución de ${species === 'all' ? 'Todas las Especies' : species}`,
+                                data: Object.values(totals),
+                                
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 3
+                            }]
+                        },
+                        options: {
+                        responsive: true,
+                        scales: {
+                            r: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.3)', // Grid color
+                                    lineWidth: 2 // Increase this value to make the grid lines thicker
+                                },
+                                angleLines: {
+                                    color: 'rgba(0, 0, 0, 0.3)', // Angle line color
+                                    lineWidth: 2 // Increase this value to make angle lines thicker
+                                },
+                                ticks: {
+                                    backdropColor: 'rgba(255, 255, 255, 0.1)' // Optional: Set a background color for scale labels
+                                }
+                            }
+                        }
+                    }
+                        
+                    });
+                }
+
+                speciesSelect.addEventListener('change', function () {
+                    updateSpiderChart(this.value);
+                });
+
+                updateSpiderChart("all");
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+		});
+    
+</script>
+{% endblock %}

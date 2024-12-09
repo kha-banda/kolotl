@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Sitio Flask{% endblock %}</title>
+    <link rel="icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <!-- Cargar el CSS y JavaScript de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JavaScript Bundle (incluye Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        #map {
+            height: 500px; /* Ajusta la altura para que sea más visible */
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar principal -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <!-- Clase adicional para ajustar el tamaño -->
+                <img src="/static/images/logo.png" alt="Registro de Alacranes" class="img-fluid" style="max-height: 100px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    
+                </ul>
+
+                <!-- Sección de inicio de sesión condicional -->
+                <ul class="navbar-nav">
+                    {% if session['loggedin'] %}
+                        {% if session['rol'] == 'admin' %}
+                        <li class="nav-item active"><a class="nav-link" href="/Usuarios">Usuarios</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/capturas">Capturas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Galeria">Estadisticas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Contacto">Mapa</a></li>
+                            <li class="nav-item">
+                                <span class="navbar-text">Hola, Admin</span>
+                            </li>
+                            
+                        {% else %}
+                            <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadísticas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Galeria">Galería</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
+                            <li class="nav-item">
+                                <span class="navbar-text">Hola, {{ session['nombre'] }}</span>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadísticas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Galeria">Galería</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
+                        <li class="nav-item">
+                            <!-- Botón que abre el modal de inicio de sesión -->
+                            <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                Iniciar Sesión
+                            </button>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container mt-4">
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Modal para inicio de sesión -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img src="/static/images/logo.png" alt="Registro de Alacranes" class="img-fluid" style="max-height: 100px;">
+                    <!-- El botón de cerrar alineado a la esquina superior derecha -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Título de Iniciar Sesión como h2 -->
+                    <h2 class="modal-title mb-4" id="loginModalLabel">Iniciar Sesión</h2>
+                    <!-- Formulario de inicio de sesión -->
+                    <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Footer con ajuste responsivo -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Mantente informado</h3>
+                    <p>Suscríbete a nuestro correo</p>
+                    <form id="newsletter">
+                        <input type="email" class="form-control mb-2" placeholder="Enter your Email">
+                        <button class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+                <div class="col-md-6 text-right">
+                    <h3>Síguenos en nuestras redes sociales</h3>
+                    <div>
+                        <a href="http://twitter.com/#!/UNCA_SUNEO" class="btn btn-outline-secondary">Twitter</a>
+                        <a href="http://www.facebook.com/pages/Universidad-de-la-Ca%C3%B1ada/282710531799277" class="btn btn-outline-secondary">Facebook</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

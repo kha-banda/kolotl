@@ -1,0 +1,612 @@
+
+
+
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<!-- Botón para abrir el modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModal">
+  Abrir Formulario
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="formModalLabel">Formulario de Recolección de Datos</h5>
+              <button type="button" id="formclose" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="modal_body">
+              <!-- Sección 1: Ubicación -->
+              <div id="section-1" class="form-section">
+                  <h5>Datos de Ubicación</h5>
+                  <div class="row mb-3">
+                      <div class="col-md-6">
+                          <label for="latitud" class="form-label">Latitud</label>
+                          <input type="text" class="form-control" name="latitud" id="latitud" placeholder="Latitud">
+                      </div>
+                      <div class="col-md-6">
+                          <label for="longitud" class="form-label">Longitud</label>
+                          <input type="text" class="form-control" name="longitud" id="longitud" placeholder="Longitud">
+                      </div>
+                  </div>
+                  <button type="button" class="btn btn-primary mb-3" id="buscarUbicacion">Buscar Ubicación</button>
+                  <button type="button" class="btn btn-primary mb-3" id="obtenerUbicacionActual">Ubicación Actual</button>
+
+                  <div class="row">
+                    <div class="col-md-4">
+                        <label for="pais" class="form-label">País</label>
+                        <input disabled type="text" class="form-control" name="pais" id="pais" placeholder="país" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="estado" class="form-label">Estado</label>
+                        <input  disabled type="text" class="form-control" name="estado" id="estado" placeholder="estado" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="ciudad" class="form-label">Ciudad</label>
+                        <input disabled type="text" class="form-control"  name="ciudad" id="ciudad" placeholder="ciudad" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label disabled for="ciudad" class="form-label">Colonia</label>
+                        <input disabled type="text" class="form-control" name="colonia" id="colonia" placeholder="colonia" readonly>
+                    </div>
+
+                  </div>
+                  <button type="button" class="btn btn-primary mt-4" id="next-1">Siguiente</button>
+              </div>
+
+              <!-- Sección 2: Datos Taxonómicos -->
+              <div id="section-2" class="form-section" style="display: none;">
+                  <h5>Datos Taxonómicos</h5>
+                  <div class="row">
+                      <div class="col-md-6">
+                          <label for="orden" class="form-label">Orden</label>
+                          <select class="form-select"  name="orden" id="orden">
+                              <option value="">Selecciona un orden...</option>
+                              <option value="Scorpiones">Scorpiones</option>
+                          </select>
+                      </div>
+                      <div class="col-md-6">
+                          <label for="familia" class="form-label">Familia</label>
+                          <select class="form-select" name="familia"id="familia">
+                              <option value="">Selecciona una familia...</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  <div class="row mt-3">
+                      <div class="col-md-6">
+                          <label for="genero" class="form-label">Género</label>
+                          <select class="form-select"name="genero" id="genero">
+                              <option value="">Selecciona un género...</option>
+                          </select>
+                      </div>
+                      <div class="col-md-6">
+                          <label for="especie" class="form-label">Especie</label>
+                          <select class="form-select" name="especie" id="especie">
+                              <option value="">Selecciona una especie...</option>
+                          </select>
+                      </div>
+                  </div>
+                  <button type="button" class="btn btn-primary mt-4" id="next-2">Siguiente</button>
+                  <button type="button" class="btn btn-secondary mt-4" id="back-1">Atrás</button>
+              </div>
+
+              <!-- Sección 3: Conteo de Alacranes -->
+              <div id="section-3" class="form-section" style="display: none;">
+                  <h5>Conteo de Alacranes</h5>
+                  <div class="row">
+                      <div class="col-md-4">
+                          <label for="adultos-macho" class="form-label">Adultos Machos</label>
+                          <input type="number" class="form-control" name="adultos-macho"id="adultos-macho" value="0">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="adultos-hembra">Adultos Hembras</label>
+                        <input type="number" class="form-control" name="adultos-hembra" id="adultos-hembra" placeholder="Cantidad" value="0">
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="jovenes-macho">Jóvenes Machos</label>
+                        <input type="number" class="form-control" name="jovenes-macho"id="jovenes-macho" placeholder="Cantidad" value="0">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="jovenes-hembra">Jóvenes Hembras</label>
+                        <input type="number" class="form-control" name="jovenes-hembra" id="jovenes-hembra" placeholder="Cantidad" value="0">
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="subadultos-macho">Subadultos Machos</label>
+                        <input type="number" class="form-control" name="subadultos-macho" id="subadultos-macho" placeholder="Cantidad" value="0">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="subadultos-hembra">Subadultos Hembras</label>
+                        <input type="number" class="form-control" name="subadultos-hembra" id="subadultos-hembra" placeholder="Cantidad" value="0">
+                      </div>
+                  </div>
+                  <div class="row mt-3">
+                      <div class="col-md-4">
+                          <label for="fechaCaptura" class="form-label">Fecha de Captura</label>
+                          <input type="date" class="form-control" name="fechaCaptura" id="fechaCaptura">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="habitatSelect" class="form-label">Selecciona un Hábitat</label>
+                          <select name="habitatSelect" id="habitatSelect" class="form-select">
+                              {% for habitat in habitats %}
+                                  <option value="{{ habitat.ID }}">{{ habitat.nombre }}</option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                  </div>
+
+                  <div class="form-group mt-4">
+                      <label for="notas" class="form-label">Notas adicionales</label>
+                      <textarea class="form-control" name="notas"id="notas" rows="3"></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-success mt-4" id="enviarDatos">Enviar</button>
+                  <button type="button" class="btn btn-secondary mt-4" id="back-2">Atrás</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Script para la funcionalidad del formulario -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const fechaCapturaInput = document.getElementById("fechaCaptura");
+      const today = new Date().toISOString().split('T')[0];
+      fechaCapturaInput.value = today;
+  });
+</script>
+
+  <div class="container my-5">
+    <h1 class="text-center">Capturas de Escorpiones</h1>
+    <div class="container-fluid">
+        <div id="captures-container">
+            <!-- Aquí se agregarán las tarjetas dinámicamente -->
+        </div>
+    </div>
+</div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script>
+let ubicacionRevisada = false;
+let especieSeleccionada = false;  // Nueva variable para controlar la selección de la especie
+</script>
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        // Llamada a la API para obtener los datos de capturas
+        fetch('/get_captures')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos de capturas');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const capturesContainer = document.getElementById('captures-container');
+
+            // Validar si existen capturas
+            if (!data.recolectas || data.recolectas.length === 0) {
+                capturesContainer.innerHTML = '<p class="text-center text-muted">No hay capturas disponibles.</p>';
+                return;
+            }
+
+            // Recorrer las capturas y crear una tarjeta para cada una
+            data.recolectas.forEach(capture => {
+                const card = document.createElement('div');
+                card.classList.add('col-12', 'mb-3'); // Margen inferior para separar tarjetas
+
+                card.innerHTML = `
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5>Captura ID: ${capture.ID_recolecta}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Columna izquierda -->
+                                <div class="col-12 col-md-6">
+                                    <h6 class="text-muted">Datos de la captura:</h6>
+                                    <p><strong>Fecha de Captura:</strong> ${capture.fecha_captura}</p>
+                                    <p><strong>especie:</strong> ${capture.genero} ${capture.especie} </p>
+                                    <p><strong>lugar de la captura:</strong> ${capture.estado},${capture.municipio}</p>
+                                    <p><strong>lat:</strong> ${capture.lat}</p>
+                                    <p><strong>longitud:</strong> ${capture.longitud}</p>
+                                    <p><strong>altura:</strong> ${capture.ALT}</p>
+                                    <p><strong>humedad:</strong> ${capture.longitud}</p>
+                                    
+                                    <p><strong>tipo de habitad:</strong> ${capture.nombre}</p>
+                                    <p><strong>Notas:</strong> ${capture.notas}</p>
+                                    
+                                    
+
+                                </div>
+                                <!-- Columna derecha -->
+                                <div class="col-12 col-md-6">
+                                    <h6 class="text-muted">Número de especímenes:</h6>
+                                    <p><strong>Adultos Macho:</strong> ${capture.adultomacho}</p>
+                                    <p><strong>Adultos Hembra:</strong> ${capture.adultohembra}</p>
+                                    <p><strong>Juveniles Macho:</strong> ${capture.juvenilmacho}</p>
+                                    <p><strong>Juveniles Hembra:</strong> ${capture.juvenilhembra}</p>
+                                    <p><strong>Subadultos Macho:</strong> ${capture.subadultomacho}</p>
+                                    <p><strong>Subadultos Hembra:</strong> ${capture.subadultohembra}</p>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-danger delete-button mx-2" data-id="${capture.ID_recolecta }">Eliminar</button>
+                                <button class="btn btn-warning edit-button mx-2" data-id="${capture.ID}">Editar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                capturesContainer.appendChild(card);
+
+                    
+                });
+                // Agregar evento click a cada botón de edición
+                document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const captureId = this.getAttribute('data-id');
+                    const captureData = data.captures.find(capture => capture.ID == captureId);
+                    
+                    // Recoger los datos del formulario
+    const latitud = document.getElementById('latitud').value =`${captureData.lat}`;
+    const longitud = document.getElementById('longitud').value =`${captureData.longitud}`;
+    const pais = document.getElementById('pais').value =`${captureData.locacion.pais}`;
+                document.getElementById('estado').value  =`${captureData.locacion.estado}`;
+                document.getElementById('ciudad').value =`${captureData.locacion.municipio}`;
+                document.getElementById('colonia').value =`${captureData.locacion.colonia}`;
+                
+                document.getElementById('orden').value =`${captureData.species_orden}`;
+                document.getElementById('familia').value =`${captureData.species_family}`;
+                document.getElementById('genero').value =`${captureData.species_genero}`;
+                document.getElementById('especie').value =`${captureData.scorpion}`;
+                
+
+                document.getElementById('adultos-macho').value;
+                document.getElementById('adultos-hembra').value;
+                document.getElementById('jovenes-macho').value;
+                document.getElementById('jovenes-hembra').value;
+                document.getElementById('subadultos-macho').value;
+                document.getElementById('subadultos-hembra').value;
+                document.getElementById('fechaCaptura').value;
+                document.getElementById('habitatSelect').value;
+                ubicacionRevisada = true;
+                especieSeleccionada = true;
+                const notas = document.getElementById('notas').value;
+
+
+
+
+
+                    // Mostrar el modal
+                    const myModal = new bootstrap.Modal(document.getElementById('formModal'));
+                    myModal.show();
+                });
+                });
+                
+                document.querySelectorAll('.delete-button').forEach(button => {
+                          button.addEventListener('click', function() {
+                          const captureId = this.getAttribute('data-id');
+                          
+                          // Confirmación antes de eliminar
+                          
+                          if (confirm('¿Estás seguro de que deseas eliminar esta captura?')) {
+                            // Realizar la solicitud DELETE a la API
+                            fetch(`/delete_capture/${captureId}`, {
+                                method: 'DELETE'
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                } else {
+                                    // Manejo explícito de errores HTTP
+                                    return response.json().then(data => {
+                                        throw new Error(data.error || 'Error desconocido al eliminar la captura.');
+                                    });
+                                }
+                            })
+                            .then(data => {
+                                // Verificar si la eliminación fue exitosa
+                                if (data.message) {
+                                    alert(data.message);
+
+                                    // Eliminar la tarjeta (card) del DOM
+                                    const card = document.getElementById(`card-${captureId}`);
+                                    if (card) {
+                                        card.remove(); // Eliminar el elemento del DOM
+                                    }
+                                } else {
+                                    alert("No se pudo eliminar la captura. Detalle: " + (data.error || "Error desconocido."));
+                                }
+                            })
+                            .catch(error => {
+                                // Mostrar errores en caso de fallo
+                                alert(`Error: ${error.message}`);
+                            });
+                        }
+                      });
+                  });
+                 
+            })
+            .catch(error => console.error('Error fetching captures:', error));
+    });
+
+
+</script>
+<script>
+    $(document).ready(function () {
+    // Control de secciones
+    $('#next-1').click(function () {
+        if (ubicacionRevisada) {
+            $('#section-1').hide();
+            $('#section-2').show();
+        } else {
+            alert('Por favor, revisa la latitud y longitud antes de continuar.');
+        }
+    });
+
+    $('#next-2').click(function () {
+        if (ubicacionRevisada && especieSeleccionada) {
+            $('#section-2').hide();
+            $('#section-3').show();
+        } else if (!especieSeleccionada) {
+            alert('Por favor, selecciona una especie antes de continuar.');
+        } else {
+            alert('Por favor, revisa la latitud y longitud antes de continuar.');
+        }
+    });
+
+    $('#back-1').click(function () {
+        $('#section-2').hide();
+        $('#section-1').show();
+    });
+
+    $('#back-2').click(function () {
+        $('#section-3').hide();
+        $('#section-2').show();
+    });
+
+    // Obtener ubicación actual
+    $('#obtenerUbicacionActual').click(function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    $('#latitud').val(position.coords.latitude);
+                    $('#longitud').val(position.coords.longitude);
+                    $('#buscarUbicacion').click();
+                },
+                function (error) {
+                    alert('Error al obtener la ubicación: ' + error.message);
+                }
+            );
+        } else {
+            alert('Geolocalización no es soportada por este navegador.');
+        }
+    });
+
+    // Buscar ubicación por latitud y longitud
+    $('#buscarUbicacion').click(function () {
+        const latitud = $('#latitud').val();
+        const longitud = $('#longitud').val();
+
+        if (latitud && longitud) {
+            fetch(`/ubicacion?latitud=${latitud}&longitud=${longitud}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Ubicación no encontrada');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.pais) {
+                        $('#pais').val(data.pais).prop('readonly', false);
+                        $('#estado').val(data.estado).prop('readonly', false);
+                        $('#ciudad').val(data.municipio).prop('readonly', false);
+                        $('#colonia').val(data.colonia).prop('readonly', false);
+                        ubicacionRevisada = true;
+                    } else {
+                        alert('Ubicación no encontrada. Por favor, rellena manualmente.');
+                        $('#estado, #ciudad, #colonia').prop('disabled', false);
+                        ubicacionRevisada = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('No se pudo encontrar la ubicación');
+                    ubicacionRevisada = false;
+                });
+        } else {
+            alert('Por favor ingresa latitud y longitud');
+            ubicacionRevisada = false;
+        }
+    });
+
+    // Actualizar ciudades al seleccionar un estado
+    $('#estado').change(function () {
+        const estado = $(this).val();
+        const pais = $('#pais').val();
+
+        if (estado) {
+            fetch(`https://nominatim.openstreetmap.org/search?state=${estado}&country=${pais}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    $('#ciudad').html('<option value="">Selecciona una ciudad...</option>').prop('disabled', false);
+                    data.forEach(location => {
+                        if (location.address && location.address.city) {
+                            $('#ciudad').append(`<option value="${location.address.city}">${location.address.city}</option>`);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        } else {
+            $('#ciudad').html('<option value="">Selecciona una ciudad...</option>').prop('disabled', true);
+        }
+    });
+
+    // Manejo de dropdowns de familias, géneros y especies
+    const scorpionesData = {{ scorpiones | tojson }};
+    const ordenSelect = $('#orden');
+    const familiaSelect = $('#familia');
+    const generoSelect = $('#genero');
+    const especieSelect = $('#especie');
+
+    const familias = {};
+    const generos = {};
+
+    scorpionesData.forEach(scorpion => {
+        const familia = scorpion.familia || 'Sin familia';
+        if (!familias[familia]) familias[familia] = [];
+        familias[familia].push(scorpion);
+
+        const genero = scorpion.genero || 'Sin género';
+        if (!generos[genero]) generos[genero] = [];
+        generos[genero].push(scorpion);
+    });
+
+    ordenSelect.on('change', function () {
+        const selectedOrden = $(this).val();
+        familiaSelect.empty().append(new Option('Selecciona una familia...', ''));
+        generoSelect.empty().append(new Option('Selecciona un género...', ''));
+        especieSelect.empty().append(new Option('Selecciona una especie...', ''));
+
+        if (selectedOrden === 'Scorpiones') {
+            Object.keys(familias).forEach(familia => {
+                familiaSelect.append(new Option(familia, familia));
+            });
+        }
+    });
+
+    familiaSelect.on('change', function () {
+        const selectedFamilia = $(this).val();
+        generoSelect.empty().append(new Option('Selecciona un género...', ''));
+        especieSelect.empty().append(new Option('Selecciona una especie...', ''));
+
+        if (selectedFamilia) {
+            const selectedScorpions = familias[selectedFamilia];
+            const generosSeleccionados = new Set();
+
+            selectedScorpions.forEach(scorpion => {
+                generosSeleccionados.add(scorpion.genero || 'Sin género');
+                especieSelect.append(new Option(scorpion.especie, scorpion.especie));
+            });
+
+            generosSeleccionados.forEach(genero => {
+                generoSelect.append(new Option(genero, genero));
+            });
+        }
+    });
+
+    generoSelect.on('change', function () {
+        const selectedGenero = $(this).val();
+        especieSelect.empty().append(new Option('Selecciona una especie...', ''));
+
+        if (selectedGenero) {
+            scorpionesData.forEach(scorpion => {
+                if ((scorpion.genero || 'Sin género') === selectedGenero) {
+                    especieSelect.append(new Option(scorpion.especie, scorpion.especie));
+                }
+            });
+        }
+    });
+
+    // Verificar si se ha seleccionado una especie
+    especieSelect.on('change', function () {
+        const selectedEspecie = $(this).val();
+        especieSeleccionada = !!selectedEspecie;
+    });
+});
+
+// Función para resetear el formulario
+function resetForm() {
+    document.querySelectorAll('.form-control').forEach(input => {
+        if (input.type === 'text' || input.type === 'number' || input.type === 'date') {
+            input.value = '';
+        } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+        } else if (input.tagName === 'TEXTAREA') {
+            input.value = '';
+        }
+    });
+}
+
+// Manejo del envío de datos
+document.getElementById('enviarDatos').addEventListener('click', function () {
+    const formModal = document.getElementById('formModal');
+    const formData = {};
+
+    // Itera sobre los elementos hijos que sean input, select, textarea, etc.
+    formModal.querySelectorAll('input, select, textarea').forEach(element => {
+    if (element.type === 'checkbox') {
+        // Para los checkboxes, almacena el estado checked
+        formData[element.name] = element.checked;
+    } else if (element.type === 'radio') {
+        // Para los radios, almacena solo si está seleccionado
+        if (element.checked) {
+        formData[element.name] = element.value;
+        }
+    } else {
+        // Para otros tipos de input, simplemente almacena el valor
+        formData[element.name] = element.value;
+    }
+    });
+    // Ahora puedes usar formData
+    console.log(formData);
+    // Serializa el objeto a JSON
+    const data = JSON.stringify(formData);
+
+    fetch('/registro_captura', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json', // Indica que el cuerpo está en formato JSON
+        },
+        body: data,
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Datos enviados correctamente');
+            } else {
+                alert('Error: ' + result.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al enviar los datos:', error);
+            alert('Error al procesar la solicitud.');
+        })
+        .finally(() => {
+            const modalElement = document.getElementById('formModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+            if (modalInstance) {
+                modalInstance.hide();
+                modalInstance.dispose();
+            }
+
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+
+            document.body.classList.remove('modal-open');
+            resetForm();
+            location.reload();
+        });
+});
+
+</script>
+{% endblock %}
