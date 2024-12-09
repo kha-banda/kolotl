@@ -1,0 +1,84 @@
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl - Mapa de Capturas{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div id="map" style="height: 600px;"></div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var map = L.map('map').setView([17.0746, -96.7132], 8);
+
+    // Capas base
+    var normalLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps'
+    });
+
+    var hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps'
+    });
+
+    var baseMaps = {
+        "Normal": normalLayer,
+        "Satélite": satelliteLayer,
+        "Híbrido": hybridLayer
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+    // Función para generar un pequeño desplazamiento aleatorio
+    function getRandomOffset() {
+        const maxOffset = 0.005; // Ajusta este valor para el rango de desplazamiento (aprox. 500m)
+        return (Math.random() - 0.5) * maxOffset;
+    }
+
+    // Cargar datos de captura desde el endpoint
+    fetch('/get_captures')
+        .then(response => response.json())
+        .then(data => {
+            data.captures.forEach(capture => {
+                var popupContent = `
+                    <strong>Especie de escorpión:</strong> ${capture.escorpion}<br>
+                    <strong>Ubicación:</strong> ${capture.locacion.estado}, ${capture.locacion.municipio}<br>
+                    <strong>Adultos Macho:</strong> ${capture.adultomacho}<br>
+                    <strong>Adultos Hembra:</strong> ${capture.adultohembra}<br>
+                    <strong>Juveniles Macho:</strong> ${capture.juvenilmacho}<br>
+                    <strong>Juveniles Hembra:</strong> ${capture.juvenilhembra}<br>
+                    <strong>Subadultos Macho:</strong> ${capture.subadultomacho}<br>
+                    <strong>Subadultos Hembra:</strong> ${capture.subadultohembra}<br>
+                    <strong>Total de escorpiones:</strong> ${capture.adultomacho + capture.adultohembra + capture.juvenilmacho + capture.juvenilhembra + capture.subadultomacho + capture.subadultohembra}<br>
+                    <strong>Hábitat:</strong> ${capture.habitat}<br>
+                    <strong>Fecha de captura:</strong> ${capture.fecha_captura}
+                `;
+
+                // Generar desplazamiento aleatorio para los marcadores
+                var offsetLat = getRandomOffset();
+                var offsetLng = getRandomOffset();
+
+                // Crear marcador con el desplazamiento
+                var marker = L.marker([capture.lat + offsetLat, capture.longitud + offsetLng]).bindPopup(popupContent);
+
+                // Crear círculo alrededor del marcador
+                var circle = L.circle([capture.lat + offsetLat, capture.longitud + offsetLng], {
+                    color: 'green',
+                    fillColor: 'green',
+                    fillOpacity: 0.1,
+                    radius: 1000 // Radio en metros (1 km)
+                });
+
+                // Añadir marcador y círculo al mapa
+                marker.addTo(map);
+                circle.addTo(map);
+            });
+        })
+        .catch(error => console.error('Error al cargar los datos de captura:', error));
+});
+</script>
+{% endblock %}
