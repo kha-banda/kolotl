@@ -1,5 +1,4 @@
 from flask import Flask, redirect, render_template, request, url_for, session, flash
-from usuarios import *  # Importa las rutas de usuarios
 import mysql.connector
 import time  # Importar el módulo time
 import datetime 
