@@ -24,9 +24,9 @@ app.secret_key = 'kolotl_unca'  # Necesario para gestionar sesiones
 API_KEY = "ec66f746a0e14f57ac1152001242911"
 # Conexión a la base de datos MySQL usando mysql-connector
 connection = mysql.connector.connect(
-    host='localhost',
+    host='69.62.71.171',
     user='root',
-    password='',
+    password='caravanadestrucs',
     database='scorpions'
 )
 

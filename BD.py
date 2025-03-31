@@ -6,9 +6,9 @@ import os
 pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
     pool_size=5,
-    host='localhost',
+    host='69.62.71.171',
     user='root',
-    password='',
+    password='caravanadestrucs',
     database='scorpions'
 )
 
