@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
+      - /app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`myapp.traefik.me`)"  # Aquí el dominio subido de Traefik
