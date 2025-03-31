@@ -8,6 +8,10 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`myapp.traefik.me`)"  # Aquí el dominio subido de Traefik
+      - "traefik.http.services.app.loadbalancer.server.port=5000"  # Asegúrate de exponer el puerto correcto
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py
