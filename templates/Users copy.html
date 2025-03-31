@@ -1,0 +1,225 @@
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl - Gestión de Usuarios{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Gestión de Usuarios</h1>
+
+    <!-- Botón para abrir el modal de nuevo usuario -->
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoUsuarioModal">
+            Crear Nuevo Usuario
+        </button>
+    </div>
+
+    <!-- Tabla para listar usuarios -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Fecha Creación</th>
+                <th>Última Actualización</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usuario-table-body">
+            {% for usuario in usuarios %}
+            <tr id="usuario-{{ usuario.id }}">
+                <td>{{ usuario.ID }}</td>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.apellido }}</td>
+                <td>{{ usuario.correo }}</td>
+                <td>{{ usuario.rol }}</td>
+                <td>{{ usuario.fecha_creacion }}</td>
+                <td>{{ usuario.ultima_actualizacion }}</td>
+                <td>
+                    <button class="btn btn-warning" onclick="editarUsuario('{{ usuario.ID }}')">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarUsuario('{{ usuario.ID }}')">Eliminar</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No hay usuarios registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de nuevo usuario -->
+<div class="modal fade" id="nuevoUsuarioModal" tabindex="-1" aria-labelledby="nuevoUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nuevoUsuarioModalLabel">Crear Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="nuevoUsuarioForm">
+                    <div class="form-group mb-3">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="apellido">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="correo">Correo</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="contrasena">Contraseña</label>
+                        <input type="password" class="form-control" id="contrasena" name="contrasena" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rol">Rol</label>
+                        <select class="form-control" id="rol" name="rol" required>
+                            <option value="user">Usuario</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="crearUsuario()">Crear Usuario</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de edición de usuario -->
+<div class="modal fade" id="editarUsuarioModal" tabindex="-1" aria-labelledby="editarUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarUsuarioModalLabel">Editar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarUsuarioForm">
+                    <input type="hidden" id="editar-usuario-id" name="editar-usuario-id">
+                    <div class="form-group mb-3">
+                        <label for="editar-nombre">Nombre</label>
+                        <input type="text" class="form-control" id="editar-nombre" name="editar-nombre" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editar-apellido">Apellido</label>
+                        <input type="text" class="form-control" id="editar-apellido" name="editar-apellido" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editar-correo">Correo</label>
+                        <input type="email" class="form-control" id="editar-correo" name="editar-correo" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editar-rol">Rol</label>
+                        <select class="form-control" id="editar-rol" name="editar-rol" required>
+                            <option value="user">Usuario</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-warning" onclick="actualizarUsuario()">Actualizar Usuario</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Función para crear un nuevo usuario
+function crearUsuario() {
+    const form = document.getElementById('nuevoUsuarioForm');
+    const formData = new FormData(form);
+    const jsonData = {};
+
+    formData.forEach((value, key) => {
+        jsonData[key] = value;
+    });
+
+    fetch('/crear_usuario', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'  // Establece el tipo de contenido como JSON
+        },
+        body: JSON.stringify(jsonData)  // Convierte el objeto a JSON
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload(); // Recargar la página para mostrar el nuevo usuario
+        } else {
+            alert('Error al crear usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al enviar la solicitud');
+    });
+}
+function editarUsuario(id) {
+    fetch(`/obtener_usuario/${id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Usuario no encontrado');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response JSON:', data); // Print the JSON response
+            document.getElementById('editar-usuario-id').value = data.ID;
+            document.getElementById('editar-nombre').value = data.nombre;
+            document.getElementById('editar-apellido').value = data.apellido;
+            document.getElementById('editar-correo').value = data.correo;
+            document.getElementById('editar-rol').value = data.rol;
+            const modal = new bootstrap.Modal(document.getElementById('editarUsuarioModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('No se pudo encontrar al usuario');
+        });
+}
+
+
+// Función para actualizar el usuario
+function actualizarUsuario() {
+    const id = document.getElementById('editar-usuario-id').value;
+    const formData = new FormData(document.getElementById('editarUsuarioForm'));
+
+    fetch(`/actualizar_usuario/${id}`, {
+        method: 'POST',
+        body: formData
+    }).then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              window.location.reload(); // Recargar la página para mostrar cambios
+          } else {
+              alert('Error al actualizar usuario');
+          }
+      });
+}
+
+// Función para eliminar un usuario
+function eliminarUsuario(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+        fetch(`/eliminar_usuario/${id}`, {
+            method: 'POST'
+        }).then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  window.location.reload();
+              } else {
+                  alert('Error al eliminar usuario');
+              }
+          });
+    }
+}
+</script>
+{% endblock %}

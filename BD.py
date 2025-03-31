@@ -6,9 +6,9 @@ import os
 pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
     pool_size=5,
-    host='69.62.71.171',
+    host='localhost',
     user='root',
-    password='caravanadestrucs',
+    password='',
     database='scorpions'
 )
 
@@ -132,39 +132,92 @@ def create_scorpion(data):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor()
+        
         query = """
-        INSERT INTO scorpions (orden, familia, superfamilia, subfamilia, genero, especie, ID_veneno, fecha_creacion, ultima_actualizacion)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+        INSERT INTO scorpions (orden, familia, superfamilia, subfamilia, genero, especie, descripcion, ID_veneno, fecha_creacion, ultima_actualizacion)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
         """
-        cursor.execute(query, (data['orden'], data['familia'], data['superfamilia'], data['subfamilia'], data['genero'], data['especie'], data['ID_veneno']))
+        
+        # Usa `.get(clave, valor_por_defecto)` para manejar valores faltantes
+        cursor.execute(query, (
+            data.get('orden', ''), 
+            data.get('familia', ''), 
+            data.get('superfamilia', ''), 
+            data.get('subfamilia', ''), 
+            data.get('genero', ''), 
+            data.get('especie', ''), 
+            data.get('descripcion', ''),  # Si no existe, se guarda como vacío
+            data.get('ID_veneno', None)  # Si no existe, se guarda como NULL
+        ))
+
+        # Confirma la transacción
         connection.commit()
+
+        # Devuelve el ID del último registro insertado
         return cursor.lastrowid
+    
     except Exception as e:
         print(f"Error creating scorpion: {e}")
         return None
+    
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()  # Cierra el cursor
+        if connection:
+            connection.close()  # Cierra la conexión
+
 
 
 def update_scorpion(scorpion_id, data):
     try:
+        # Obtener conexión a la base de datos
         connection = pool.get_connection()
         cursor = connection.cursor()
+
+        # Actualizar la consulta para modificar los valores del escorpión
         query = """
         UPDATE scorpions 
-        SET orden = %s, familia = %s, superfamilia = %s, subfamilia = %s, genero = %s, especie = %s, ID_veneno = %s, ultima_actualizacion = NOW()
-        WHERE ID = %s
+        SET orden = %s, 
+            familia = %s, 
+            superfamilia = %s, 
+            subfamilia = %s, 
+            genero = %s, 
+            especie = %s, 
+            descripcion = %s, 
+            ID_veneno = %s, 
+            ultima_actualizacion = NOW()
+        WHERE id = %s
         """
-        cursor.execute(query, (data['orden'], data['familia'], data['superfamilia'], data['subfamilia'], data['genero'], data['especie'], data['ID_veneno'], scorpion_id))
+        
+        # Ejecutar la consulta con los datos proporcionados
+        cursor.execute(query, (
+            data.get('orden', ''),
+            data.get('familia', ''),
+            data.get('superfamilia', ''),
+            data.get('subfamilia', ''),
+            data.get('genero', ''),
+            data.get('especie', ''),
+            data.get('descripcion', ''),
+            data.get('ID_veneno', None),  # Si no existe, se guarda como NULL
+            scorpion_id
+        ))
+
+        # Confirmar la transacción
         connection.commit()
-        return cursor.rowcount > 0
+
+        # Devolver el ID del escorpión actualizado
+        return scorpion_id
+
     except Exception as e:
         print(f"Error updating scorpion: {e}")
-        return False
+        return None
+
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()  # Cerrar el cursor
+        if connection:
+            connection.close()  # Cerrar la conexión
+
 
 
 def delete_scorpion(scorpion_id):

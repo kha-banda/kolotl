@@ -98,7 +98,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetch('/get_captures')
+        fetch('/get_captures_data')
             .then(response => response.json())
             .then(data => {
                 document.getElementById('totalCaptures').innerText = data.statistics.total_captures;

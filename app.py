@@ -1,7 +1,8 @@
 from flask import Flask, redirect, render_template, request, url_for, session, flash
+from usuarios import *  # Importa las rutas de usuarios
 import mysql.connector
 import time  # Importar el módulo time
-import datetime 
+from datetime import datetime
 import plotly.graph_objs as go
 from functools import wraps
 from flask import jsonify
@@ -23,9 +24,9 @@ app.secret_key = 'kolotl_unca'  # Necesario para gestionar sesiones
 API_KEY = "ec66f746a0e14f57ac1152001242911"
 # Conexión a la base de datos MySQL usando mysql-connector
 connection = mysql.connector.connect(
-    host='69.62.71.171',
+    host='localhost',
     user='root',
-    password='caravanadestrucs',
+    password='',
     database='scorpions'
 )
 
@@ -150,6 +151,7 @@ def capturas():
                 'nombre': row['nombre'],
             })
         cursor.close()
+
         return render_template('capturas.html',session = session,scorpiones = scorpion_data,habitats = habitats )
     else:
         return render_template('index.html')
@@ -174,61 +176,119 @@ def delete_capture(capture_id):
 def submit_data():
     # Recibir los datos del formulario enviados por el modal
     try:
-        
-        # Procesa la solicitud JSON
+      # Procesa la solicitud JSON
+        import json
+
         data = request.get_json()
 
         # Sección de Ubicación
-        latitud = double(data.get('latitud'))
-        longitud = data.get('longitud')
-        pais = data.get('pais')
-        estado = data.get('estado')
-        ciudad = data.get('ciudad')
-        colonia = data.get('colonia')
-
+        latitud = data.get('latitud', 'No especificada')
+        longitud = data.get('longitud', 'No especificada')
+        pais = data.get('pais', 'No especificado')
+        estado = data.get('estado', 'No especificado')
+        ciudad = data.get('ciudad', 'No especificada')
+        colonia = data.get('colonia', 'No especificada')
         # Sección de Datos Taxonómicos
-        orden = data.get('orden')
-        familia = data.get('familia')
-        genero = data.get('genero')
-        especie = data.get('especie')
-
+        orden = data.get('orden', 'No especificado')
+        familia = data.get('familia', 'No especificada')
+        genero = data.get('genero', 'No especificado')
+        especie = data.get('especie', 'No especificada')
         # Sección de Conteo de Alacranes
-        adultos_macho = int(data.get('adultos_macho', 0))
-        adultos_hembra = int(data.get('adultos_hembra', 0))
-        jovenes_macho = int(data.get('jovenes_macho', 0))
-        jovenes_hembra = int(data.get('jovenes_hembra', 0))
-        subadultos_macho = int(data.get('subadultos_macho', 0))
-        subadultos_hembra = int(data.get('subadultos_hembra', 0))
-        habitat = int(data.get('habitat', 0))
-        fecha_captura = data.get('fechaCaptura', '')
+        adultos_macho = int(data.get('adultos-macho', 0))
+        adultos_hembra = int(data.get('adultos-hembra', 0))
+        jovenes_macho = int(data.get('jovenes-macho', 0))
+        jovenes_hembra = int(data.get('jovenes-hembra', 0))
+        subadultos_macho = int(data.get('subadultos-macho', 0))
+        subadultos_hembra = int(data.get('subadultos-hembra', 0))
+        habitat = data.get('habitatSelect', 0)
+        fecha_captura = data.get('fechaCaptura', 'No especificada')
         notas = data.get('notas', '')
-        print(fecha_captura)
+                
+        if fecha_captura:
+            try:
+                # Intentar convertir `fechaCaptura` en un objeto datetime
+                fecha_obj = datetime.strptime(fecha_captura, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                # Manejar un formato incorrecto
+                raise ValueError("El formato de 'fechaCaptura' debe ser YYYY-MM-DDTHH:MM.")
+        else:
+            # Si no se proporciona fecha, usar la fecha y hora actual
+            fecha_obj = datetime.now()
+
+        # Formatear como lo necesites (por ejemplo, solo fecha o fecha y hora)
+        fecha_formateada = fecha_obj.strftime('%Y-%m-%d')  # Solo la fecha
+        hora_formateada = fecha_obj.strftime('%H:%M')      # Solo la hora
+        
         cursor = connection.cursor(dictionary=True)
         cursor.execute('SELECT * FROM locacion WHERE  pais = %s and estado = %s and municipio = %s and colonia  = %s ', [ pais, estado, ciudad, colonia])
         locacion = cursor.fetchone()
-        # id_locacion = ""
-        # if locacion:
-        #      id_locacion = locacion['ID']  # Almacena el ID de la locacion
-        # else:
-            # cursor.execute(
-            #     'INSERT INTO locacion ( cp, pais, estado, municipio, colonia, fecha_creacion, ultima_actualizacion) VALUES (%s,%s,%s,%s,%s, NOW(), NOW())',
-            #     (" ",pais,estado,ciudad,colonia)
+        id_locacion = ""
+        if locacion:
+            id_locacion = locacion['ID']  # Almacena el ID de la locacion
+        else:
+            cursor.execute(
+                'INSERT INTO locacion ( cp, pais, estado, municipio, colonia, fecha_creacion, ultima_actualizacion) VALUES (%s,%s,%s,%s,%s, NOW(), NOW())',
+            (" ",pais,estado,ciudad,colonia)
 
-            # )
-            # connection.commit()
-            # # Obtener el ID del registro insertado
-            # id_locacion = cursor.lastrowid
-        # cursor.execute('SELECT * FROM scorpions WHERE  orden = %s and familia = %s and genero = %s and especie  = %s ', [orden, familia, genero, especie])
-        # scorpion = cursor.fetchone()
-        # id_scorpion = ""
-        # if scorpion:
-        #     id_scorpion = scorpion['ID']
-        # else:
-        #     return jsonify({'error':' escorpion no encontrado.'}), 500
-    
-        temperatura= obtener_clima_fecha(latitud,longitud,fecha_captura,API_KEY)
-        print(temperatura)
+            )
+            connection.commit()
+            
+            # Obtener el ID del registro insertado
+            id_locacion = cursor.lastrowid
+        cursor.execute('SELECT * FROM scorpions WHERE  orden = %s and familia = %s and genero = %s and especie  = %s ', [orden, familia, genero, especie])
+        scorpion = cursor.fetchone()
+        id_scorpion = ""
+        if scorpion:
+            id_scorpion = scorpion['ID']
+        else:
+            return jsonify({'error':' escorpion no encontrado.'}), 500
+        cursor = connection.cursor()
+            
+        # Consulta SQL de inserción
+        query = """
+                INSERT INTO `recolecta`(
+                    `fecha_captura`, `adultomacho`, `adultohembra`, 
+                    `juvenilmacho`, `juvenilhembra`, `subadultomacho`, `subadultohembra`, 
+                    `notas`, `ID_usuario`, `ID_locacion`, `ID_habitat`, `ID_scorpion`, 
+                    `fecha_creacion`, `ultima_actualizacion`
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,NOW(), NOW())
+            """
+            
+        # Valores a insertar
+        values = (
+                fecha_formateada,adultos_macho,adultos_hembra,
+                jovenes_macho,jovenes_hembra, subadultos_macho, subadultos_hembra,
+                notas, session['id'],id_locacion,habitat,
+                id_scorpion
+            )
+            
+        # Ejecutar la consulta
+        cursor.execute(query, values)
         connection.commit()
+        # Obtener el ID del registro insertado
+        id_captura = cursor.lastrowid
+        temperatura= obtener_clima_fecha(latitud,longitud,fecha_formateada,API_KEY,OPEN_WEATHER_MAP,hora_formateada)
+        cursor = connection.cursor()
+
+        # Consulta SQL de inserción
+        query = """
+                INSERT INTO `coordenadas_recolecta`(
+                    `lat`, `longitud`, `ALT`, `temperatura`, `humedad`, `ID_recolecta`
+                ) VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            
+        # Valores a insertar
+        values = (
+                latitud, longitud, temperatura['altitud'],
+                temperatura['temperatura_min'], temperatura['humedad'], id_captura
+            )
+            
+        # Ejecutar la consulta
+        cursor.execute(query, values)
+        connection.commit()
+        print(f"Registro insertado exitosamente con ID_coordenadas: {cursor.lastrowid}")
+        print("Registro insertado exitosamente.")
+
 
         return jsonify({'success': 'Datos guardados correctamente.'}), 200
     except Exception as e:
@@ -261,13 +321,13 @@ def actualizar_captura():
         especie = request.form.get('especie')
 
         # Sección de Conteo de Alacranes
-        adultos_macho = int(request.form.get('adultos_macho', 0))
-        adultos_hembra = int(request.form.get('adultos_hembra', 0))
-        jovenes_macho = int(request.form.get('jovenes_macho', 0))
-        jovenes_hembra = int(request.form.get('jovenes_hembra', 0))
-        subadultos_macho = int(request.form.get('subadultos_macho', 0))
-        subadultos_hembra = int(request.form.get('subadultos_hembra', 0))
-        habitat = int(request.form.get('habitat', 0))
+        adultos_macho = int(request.form.get('adultos-macho', 0))
+        adultos_hembra = int(request.form.get('adultos-hembra', 0))
+        jovenes_macho = int(request.form.get('jovenes-macho', 0))
+        jovenes_hembra = int(request.form.get('jovenes-hembra', 0))
+        subadultos_macho = int(request.form.get('subadultos-macho', 0))
+        subadultos_hembra = int(request.form.get('subadultos-hembra', 0))
+        habitat = int(request.form.get('habitatSelect', 0))
         fecha_captura = request.form.get('fecha_captura', '')
         notas = request.form.get('notas', '')
 
@@ -396,8 +456,6 @@ def get_captures_data():
                 'juvenilhembra': row['juvenilhembra'],
                 'subadultomacho': row['subadultomacho'],
                 'subadultohembra': row['subadultohembra'],
-                'lat': row['lat'],
-                'longitud': row['longitud'],
                 'locacion': locacion,
                 'habitat': habitat_name,
                 'escorpion': species_name,
@@ -438,9 +496,6 @@ def obtener_ubicacion(latitud, longitud):
 
     if respuesta.status_code == 200:
         data = respuesta.json()
-        
-        # Imprimir la respuesta completa para verificar su estructura
-        print("Respuesta de HERE API:", data)
 
         if data and 'items' in data and len(data['items']) > 0:
             # Obtener la primera ubicación encontrada
@@ -547,6 +602,7 @@ def delete_contact(id):
 
 # Ruta para visualizar estadísticas (ejemplo de gráficos con Plotly)
 @app.route('/Estadisticas')
+@login_required
 def estadisticas():
     x_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     y_data = [10, 15, 20, 12, 78, 30, 13, 34, 23, 56, 12, 89]
@@ -588,32 +644,59 @@ def acerca():
 @login_required  # Esto asegura que solo usuarios autenticados puedan acceder a esta ruta
 def scorpiones():
      if 'loggedin' in session and session['rol'] == "admin":
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("""
-        SELECT 
-            s.*,        -- Todos los campos de la tabla scorpions con prefijo s
-            v.*,        -- Todos los campos de la tabla veneno con prefijo v
-            mp.*,       -- Todos los campos de la tabla multiples_publicaciones con prefijo mp
-            p.*         -- Todos los campos de la tabla publicaciones con prefijo p
-        FROM scorpions s
-        LEFT JOIN veneno v ON s.ID_veneno = v.ID
-        LEFT JOIN publicacion_scorpion mp ON s.ID = mp.ID_scorpion
-        LEFT JOIN publicacion p ON mp.ID_publicacion = p.ID
-        """)
-        scorpion_data = cursor.fetchall()
-
-
-
-
+        scorpion_data = get_all_scorpions()
         return render_template('scorpions.html',scorpion_data = scorpion_data )
      else:
         return redirect(url_for('Index'))
+        
+@app.route('/get_scorpion/<int:scorpion_id>', methods=['GET'])
+def get_scorpion(scorpion_id):
+    # Llamar a la función get_scorpion_by_id
+    scorpion = get_scorpion_by_id(scorpion_id)
+    if scorpion:
+        return jsonify({'success': True, 'scorpion': scorpion}), 200
+    else:
+        return jsonify({'success': False, 'error': 'Escorpión no encontrado'}), 404
 
+@app.route('/create_scorpion', methods=['POST'])
+def create_scorpion_endpoint():
+    try:
+        data = request.get_json()
+        if not data:
+             return jsonify({"success": False, "error": "No data provided"}), 400
 
+        scorpion_id = create_scorpion(data)
 
+        if scorpion_id:
+            return jsonify({"success": True, "scorpion_id": scorpion_id}), 201
+        else:
+            return jsonify({"success": False, "error": "Failed to create scorpion"}), 500
 
+    except Exception as e:
+        print(f"Error in endpoint: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/update_scorpion/<int:scorpion_id>', methods=['PUT'])
+def update_scorpion_endpoint(scorpion_id):
+    try:
+        # Obtener los datos en formato JSON desde la solicitud
+        data = request.get_json()
+        
+        # Si no hay datos, respondemos con un error
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        # Llamamos a la función de actualización pasando el ID y los datos
+        updated_scorpion_id = update_scorpion(scorpion_id, data)
 
+        if updated_scorpion_id:
+            return jsonify({"success": True, "scorpion_id": updated_scorpion_id}), 200
+        else:
+            return jsonify({"success": False, "error": "Failed to update scorpion"}), 500
+
+    except Exception as e:
+        print(f"Error in update_scorpion_endpoint: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route('/Contacto')
@@ -621,26 +704,19 @@ def contacto():
     return render_template('index-4.html')
 
 
-
-
-
-
-
-def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api):
+def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api, api_key_openweather, hora=None):
     try:
         # Intentar convertir la fecha proporcionada al formato correcto
         try:
-            fecha_obj = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
         except ValueError:
             try:
-                # Intentar con formatos comunes incorrectos
-                fecha_obj = datetime.datetime.strptime(fecha, "%d-%m-%Y")
-                # Si se corrige el formato, cambiar a YYYY-MM-DD
+                fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
                 fecha = fecha_obj.strftime("%Y-%m-%d")
             except ValueError:
                 return {"error": "El formato de la fecha debe ser YYYY-MM-DD o DD-MM-YYYY."}
 
-        hoy = datetime.datetime.now()
+        hoy = datetime.now()
 
         # Verificar si la fecha no está en el futuro
         if fecha_obj > hoy:
@@ -649,46 +725,109 @@ def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api):
         # Convertir la fecha al formato requerido por WeatherAPI (YYYY-MM-DD)
         fecha_str = fecha_obj.strftime("%Y-%m-%d")
 
+        # Usar una API de geocodificación inversa para mejorar la precisión de la ubicación
+        geo_url = f"https://api.bigdatacloud.net/data/reverse-geocode-client"
+        geo_params = {
+            "latitude": latitud,
+            "longitude": longitud,
+            "localityLanguage": "es"
+        }
+        geo_response = requests.get(geo_url, params=geo_params)
+        if geo_response.status_code == 200:
+            geo_data = geo_response.json()
+            ubicacion = geo_data.get("locality", "Desconocida")
+            region = geo_data.get("principalSubdivision", "Desconocida")
+            pais = geo_data.get("countryName", "Desconocido")
+        else:
+            ubicacion = region = pais = "Desconocido"
+
         # Construir la URL para la API de WeatherAPI
-        url = f"https://api.weatherapi.com/v1/history.json"
-        params = {
+        clima_url = f"https://api.weatherapi.com/v1/history.json"
+        clima_params = {
             "key": api_key_weather_api,
             "q": f"{latitud},{longitud}",
             "dt": fecha_str,
             "lang": "es"
         }
 
-        # Realizar la solicitud a la API
-        response = requests.get(url, params=params)
+        # Realizar la solicitud a la API de clima
+        clima_response = requests.get(clima_url, params=clima_params)
+        if clima_response.status_code == 200:
+            clima_data = clima_response.json()
 
-        if response.status_code == 200:
-            data = response.json()
+            # Datos generales del clima diario
+            forecast = clima_data['forecast']['forecastday'][0]
+            day_data = forecast['day']
 
-            # Construir la respuesta con los datos relevantes
-            altitud = None
-            if "main" in data and "sea_level" in data["main"] and "grnd_level" in data["main"]:
-                presion_nivel_mar = data["main"]["sea_level"]
-                presion_suelo = data["main"]["grnd_level"]
-                # Fórmula simplificada para calcular altitud
-                altitud = 44330 * (1 - (presion_suelo / presion_nivel_mar) ** 0.1903)
+            # Datos de OpenWeatherMap para altitud
+            openweather_url = f"https://api.openweathermap.org/data/2.5/weather?"
+            openweather_params = {
+                "lat": latitud,
+                "lon": longitud,
+                "appid": api_key_openweather,
+                "units": "metric"
+            }
+
+            openweather_response = requests.get(openweather_url, params=openweather_params)
+            altitud = "No disponible"
+            if openweather_response.status_code == 200:
+                openweather_data = openweather_response.json()
+                sea_level = openweather_data.get('main', {}).get('sea_level')
+                pressure = openweather_data.get('main', {}).get('grnd_level')
+                sea_level = float(sea_level)
+                pressure = float(pressure)
+                if sea_level and pressure:
+                    try:
+                        altitud_calculada = 44330 * (1 - (pressure / sea_level) ** 0.1903)
+                        altitud = altitud_calculada
+                    except ValueError as e:
+                        altitud = "No disponible (valores inválidos de presión o nivel del mar)"
+                    except Exception as e:
+                        altitud = "No disponible (error inesperado)"
+
+
+            # Datos por hora (si se proporciona una hora)
+            clima_horario = None
+            if hora:
+                try:
+                    hora_entera = int(hora.split(":")[0])  # Asegurarse de que hora tiene formato HH:MM
+                    hora_str = f"{hora_entera:02}:00"
+
+                    # Buscar en los datos horarios de la previsión
+                    for hourly_data in forecast['hour']:
+                        if hourly_data['time'].endswith(hora_str):
+                            clima_horario = {
+                                "temperatura": f"{hourly_data['temp_c']}°C",
+                                "humedad": f"{hourly_data['humidity']}%",
+                                "condiciones": hourly_data['condition']['text'],
+                                "viento": f"{hourly_data['wind_kph']} km/h",
+                            }
+                            break
+                except ValueError:
+                    clima_horario = "Formato de hora inválido."
+
+            # Construir la respuesta final
             clima = {
                 "fecha": fecha,
-                "ubicacion": data['location']['name'],
-                "region": data['location']['region'],
-                "pais": data['location']['country'],
-                "temperatura_max": f"{data['forecast']['forecastday'][0]['day']['maxtemp_c']}°C",
-                "temperatura_min": f"{data['forecast']['forecastday'][0]['day']['mintemp_c']}°C",
-                "humedad": f"{data['forecast']['forecastday'][0]['day']['avghumidity']}%",
-                "condiciones": data['forecast']['forecastday'][0]['day']['condition']['text'],
-                "viento_max": f"{data['forecast']['forecastday'][0]['day']['maxwind_kph']} km/h",
-                "altitud": f"{altitud:.2f} metros" if altitud else "No disponible"
+                "ubicacion": ubicacion,
+                "region": region,
+                "pais": pais,
+                "temperatura_max": f"{day_data['maxtemp_c']}°C",
+                "temperatura_min": f"{day_data['mintemp_c']}°C",
+                "humedad": f"{day_data['avghumidity']}%",
+                "condiciones_dia": day_data['condition']['text'],
+                "viento_max": f"{day_data['maxwind_kph']} km/h",
+                "altitud": altitud,
+                "clima_horario": clima_horario or "No se encontró información para la hora especificada."
             }
             return clima
         else:
-            return {"error": "No se pudo obtener el clima. Verifica los datos o tu API Key."}
+            return {"error": f"No se pudo obtener el clima (HTTP {clima_response.status_code}). Verifica los datos o tu API Key."}
 
-    except ValueError as e:
-        return {"error": f": {str(e)}"}
+    except Exception as e:
+        return {"error": f"Ocurrió un error: {str(e)}"}
+
+
 
 
 if __name__ == '__main__':

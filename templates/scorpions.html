@@ -1,0 +1,283 @@
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl - Gestión de Usuarios{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Gestión de Escorpiones</h1>
+
+    <!-- Botón para abrir el modal de nuevo usuario -->
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModal">
+            Crear Nuevo Escorpion
+        </button>
+    </div>
+
+    <!-- Tabla para listar usuarios -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Orden</th>
+                <th>Familia</th>
+                <th>Genero</th>
+                <th>Especie</th>
+                <th>descripcion</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usuario-table-body">
+            {% for scorpion in scorpion_data %}
+            <tr id="scorpion-{{scorpion.ID }}">
+                <td>{{ scorpion.ID }}</td>
+                <td>{{ scorpion.orden }}</td>
+                <td>{{ scorpion.familia }}</td>
+                <td>{{ scorpion.genero }}</td>
+                <td>{{ scorpion.especie }}</td>
+                <td>{{ scorpion.descripcion }}</td>
+                <td>
+                    <button class="btn btn-warning" onclick="editarUsuario('{{  scorpion.ID }}')">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarUsuario('{{  scorpion.ID }}')">Eliminar</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No hay usuarios registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel">Formulario de Datos de Escorpiones</h5>
+                <button type="button" id="formclose" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal_body">
+                <div id="section-1" class="form-section">
+                    <h5>Datos del Escorpión</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="orden" class="form-label">Orden</label>
+                            <input type="text" class="form-control" name="orden" id="orden" value="Scorpiones">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="familia" class="form-label">Familia</label>
+                            <input type="text" class="form-control" name="familia" id="familia" value="">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="genero" class="form-label">Género</label>
+                            <input type="text" class="form-control" name="genero" id="genero" value="">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="especie" class="form-label">Especie</label>
+                            <input type="text" class="form-control" name="especie" id="especie" value="">
+                        </div>
+                    </div>
+                    <div class="form-group mt-4">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion" id="descripcion" rows="3"></textarea>
+                    </div>
+
+                    <!-- Campo oculto para almacenar el ID del escorpión cuando se edite -->
+                    <input type="hidden" id="scorpionId">
+
+                    <button type="submit" class="btn btn-success mt-4" id="enviarDatos">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+
+// Función para resetear el formulario
+function resetForm() {
+    document.querySelectorAll('.form-control').forEach(input => {
+        if (input.type === 'text' || input.type === 'number' || input.type === 'date') {
+            input.value = '';
+        } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+        } else if (input.tagName === 'TEXTAREA') {
+            input.value = '';
+        }
+    });
+}
+
+// Manejo del envío de datos
+document.getElementById('enviarDatos').addEventListener('click', function () {
+    const formModal = document.getElementById('formModal');
+    const formData = {};
+
+    // Itera sobre los elementos hijos que sean input, select, textarea, etc.
+    formModal.querySelectorAll('input, select, textarea').forEach(element => {
+    if (element.type === 'checkbox') {
+        // Para los checkboxes, almacena el estado checked
+        formData[element.name] = element.checked;
+    } else if (element.type === 'radio') {
+        // Para los radios, almacena solo si está seleccionado
+        if (element.checked) {
+        formData[element.name] = element.value;
+        }
+    } else {
+        // Para otros tipos de input, simplemente almacena el valor
+        formData[element.name] = element.value;
+    }
+    });
+    // Ahora puedes usar formData
+    console.log(formData);
+    // Serializa el objeto a JSON
+    const data = JSON.stringify(formData);
+
+    fetch('/create_scorpion', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json', // Indica que el cuerpo está en formato JSON
+        },
+        body: data,
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Datos enviados correctamente');
+            } else {
+                alert('Error: ' + result.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al enviar los datos:', error);
+            alert('Error al procesar la solicitud.');
+        })
+        .finally(() => {
+            const modalElement = document.getElementById('formModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+            if (modalInstance) {
+                modalInstance.hide();
+                modalInstance.dispose();
+            }
+
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+
+            document.body.classList.remove('modal-open');
+            resetForm();
+            location.reload();
+        });
+});
+});
+</script>
+<script>
+    $(document).ready(function () {
+        // Función para cargar los datos del escorpión en el modal
+        window.editarUsuario = function (scorpionId) {
+            // Cambiar el título y el texto del botón a "Editar"
+            document.getElementById("formModalLabel").innerText = "Editar Datos de Escorpión";
+            document.getElementById("enviarDatos").innerText = "Actualizar";
+
+            // Llenar los campos del formulario con los datos del escorpión
+            fetch(`/get_scorpion/${scorpionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const scorpion = data.scorpion;
+                        document.getElementById("orden").value = scorpion.orden;
+                        document.getElementById("familia").value = scorpion.familia;
+                        document.getElementById("genero").value = scorpion.genero;
+                        document.getElementById("especie").value = scorpion.especie;
+                        document.getElementById("descripcion").value = scorpion.descripcion;
+                        document.getElementById("scorpionId").value = scorpion.ID;
+                    } else {
+                        alert("Error al cargar los datos del escorpión.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener los datos:", error);
+                    alert("Hubo un error al obtener los datos.");
+                });
+
+            // Mostrar el modal
+            const modalElement = document.getElementById("formModal");
+            const modalInstance = new bootstrap.Modal(modalElement);
+            modalInstance.show();
+        }
+
+        // Manejo del envío de datos (crear o editar)
+        document.getElementById('enviarDatos').addEventListener('click', function () {
+            const formModal = document.getElementById('formModal');
+            const formData = {};
+
+            // Itera sobre los elementos del formulario
+            formModal.querySelectorAll('input, select, textarea').forEach(element => {
+                if (element.type === 'checkbox') {
+                    formData[element.name] = element.checked;
+                } else if (element.type === 'radio') {
+                    if (element.checked) {
+                        formData[element.name] = element.value;
+                    }
+                } else {
+                    formData[element.name] = element.value;
+                }
+            });
+
+            // Obtener el ID del escorpión (si se está editando)
+            const scorpionId = document.getElementById("scorpionId").value;
+            let url = '/create_scorpion'; // URL para creación
+            let method = 'POST'; // Método para creación
+
+            if (scorpionId) {
+                url = `/update_scorpion/${scorpionId}`; // URL para editar
+                method = 'PUT'; // Método para edición
+            }
+
+            // Serializar y enviar los datos al servidor
+            const data = JSON.stringify(formData);
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json', // Indica que el cuerpo está en formato JSON
+                },
+                body: data,
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Datos enviados correctamente');
+                    location.reload(); // Recargar la página para reflejar los cambios
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error al enviar los datos:', error);
+                alert('Error al procesar la solicitud.');
+            })
+            .finally(() => {
+                // Cerrar el modal y resetear el formulario
+                const modalElement = document.getElementById('formModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+                if (modalInstance) {
+                    modalInstance.hide();
+                    modalInstance.dispose();
+                }
+
+                resetForm();
+            });
+        });
+    });
+</script>
+
+{% endblock %}

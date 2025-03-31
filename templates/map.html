@@ -6,11 +6,24 @@
 {% endblock %}
 
 {% block content %}
-<div id="map" style="height: 600px;"></div>
+<div id="map" style="height: 600px; position: relative;">
+    <!-- Panel de información -->
+    <div id="info-panel" style="position: absolute; left: 0; top: 0; bottom: 0; width: 300px; background: #fff; overflow-y: auto; box-shadow: 2px 0 5px rgba(0,0,0,0.2); padding: 16px; display: none; z-index: 10000;">
+        <button id="close-panel" style="background: none; border: none; font-size: 16px; float: right; cursor: pointer;">✖</button>
+        <h5>Detalles de la Captura</h5>
+        <div id="info-content"></div>
+    </div>
+</div>
+
+
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById('close-panel').addEventListener('click', () => {
+    document.getElementById('info-panel').style.display = 'none';
+    });
+
     var map = L.map('map').setView([17.0746, -96.7132], 8);
 
     // Capas base
@@ -29,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var baseMaps = {
         "Normal": normalLayer,
         "Satélite": satelliteLayer,
-        "Híbrido": hybridLayer
+        "Híbrido": hybridLayer,
     };
     L.control.layers(baseMaps).addTo(map);
 
@@ -43,28 +56,46 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch('/get_captures')
         .then(response => response.json())
         .then(data => {
-            data.captures.forEach(capture => {
-                var popupContent = `
-                    <strong>Especie de escorpión:</strong> ${capture.escorpion}<br>
-                    <strong>Ubicación:</strong> ${capture.locacion.estado}, ${capture.locacion.municipio}<br>
-                    <strong>Adultos Macho:</strong> ${capture.adultomacho}<br>
-                    <strong>Adultos Hembra:</strong> ${capture.adultohembra}<br>
-                    <strong>Juveniles Macho:</strong> ${capture.juvenilmacho}<br>
-                    <strong>Juveniles Hembra:</strong> ${capture.juvenilhembra}<br>
-                    <strong>Subadultos Macho:</strong> ${capture.subadultomacho}<br>
-                    <strong>Subadultos Hembra:</strong> ${capture.subadultohembra}<br>
-                    <strong>Total de escorpiones:</strong> ${capture.adultomacho + capture.adultohembra + capture.juvenilmacho + capture.juvenilhembra + capture.subadultomacho + capture.subadultohembra}<br>
-                    <strong>Hábitat:</strong> ${capture.habitat}<br>
-                    <strong>Fecha de captura:</strong> ${capture.fecha_captura}
-                `;
+            data.recolectas.forEach(capture => {
+
 
                 // Generar desplazamiento aleatorio para los marcadores
                 var offsetLat = getRandomOffset();
                 var offsetLng = getRandomOffset();
 
                 // Crear marcador con el desplazamiento
-                var marker = L.marker([capture.lat + offsetLat, capture.longitud + offsetLng]).bindPopup(popupContent);
+                var marker = L.marker([capture.lat + offsetLat, capture.longitud + offsetLng]);
+                marker.on('click', () => {
+                // Generar contenido HTML dinámico para la tarjeta
+                const infoContent = `
+                    <div class="capture-card" style="margin-bottom: 16px;">
+                        <img src="${capture.imagen || 'placeholder.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
+                        <h6 style="margin-bottom: 8px;">Datos de la Captura</h6>
+                        <p><strong>Fecha:</strong> ${capture.fecha_captura}</p>
+                        <p><strong>Especie:</strong> ${capture.genero} ${capture.especie}</p>
+                        <p><strong>Lugar:</strong> ${capture.estado}, ${capture.municipio}</p>
+                        <p><strong>Lat:</strong> ${capture.lat}</p>
+                        <p><strong>Long:</strong> ${capture.longitud}</p>
+                        <p><strong>Altura:</strong> ${capture.ALT}</p>
+                        <p><strong>Humedad:</strong> ${capture.humedad}</p>
+                        <p><strong>Hábitat:</strong> ${capture.nombre}</p>
+                        <p><strong>Notas:</strong> ${capture.notas}</p>
+                        <h6 style="margin-top: 12px;">Número de Especímenes</h6>
+                        <ul style="padding-left: 20px;">
+                            <li>Adultos Macho: ${capture.adultomacho}</li>
+                            <li>Adultos Hembra: ${capture.adultohembra}</li>
+                            <li>Juveniles Macho: ${capture.juvenilmacho}</li>
+                            <li>Juveniles Hembra: ${capture.juvenilhembra}</li>
+                            <li>Subadultos Macho: ${capture.subadultomacho}</li>
+                            <li>Subadultos Hembra: ${capture.subadultohembra}</li>
+                        </ul>
+                    </div>
+                `;
 
+                // Mostrar la tarjeta en el panel
+                document.getElementById('info-content').innerHTML = infoContent;
+                document.getElementById('info-panel').style.display = 'block';
+            });
                 // Crear círculo alrededor del marcador
                 var circle = L.circle([capture.lat + offsetLat, capture.longitud + offsetLng], {
                     color: 'green',
