@@ -1,7 +1,8 @@
+from flask import Flask, redirect, render_template, request, url_for, session, flash
 import mysql.connector
 from mysql.connector import pooling
 import os
-
+from flask import jsonify
 # Configuración del pool de conexiones
 pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
@@ -364,9 +365,9 @@ def crear_recolecta():
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (lat, longitud, alt, humedad_ambiente, temperatura, recolecta_id))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return jsonify({"message": "Recolecta y coordenadas creadas correctamente"}), 201
 
@@ -393,7 +394,7 @@ def obtener_recolecta(id):
         coordenadas = cursor.fetchone()
         
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {
             "recolecta": recolecta,
@@ -427,8 +428,8 @@ def actualizar_recolecta(id, data):
         humedad_ambiente = data['humedad_ambiente']
         temperatura = data['temperatura']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Actualizar recolecta
         cursor.execute("""
@@ -444,9 +445,9 @@ def actualizar_recolecta(id, data):
             WHERE recolecta_id = %s
         """, (lat, longitud, alt, humedad_ambiente, temperatura, id))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Recolecta y coordenadas actualizadas correctamente"}, 200
 
@@ -509,9 +510,8 @@ def crear_veneno(data):
         formula = data['formula']
         fecha_creacion = data['fecha_creacion']
         ultima_actualizacion = data['ultima_actualizacion']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Insertar veneno
         cursor.execute("""
@@ -519,9 +519,9 @@ def crear_veneno(data):
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (nombre, tipo, sintomas, usos, formula, fecha_creacion, ultima_actualizacion))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Veneno creado correctamente"}, 201
 
@@ -529,8 +529,8 @@ def crear_veneno(data):
         return {"error": str(e)}, 500
 def obtener_veneno(id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        connection = pool.get_connection()
+        cursor = connection.cursor(dictionary=True)
         
         # Obtener veneno por ID
         cursor.execute("""
@@ -542,7 +542,7 @@ def obtener_veneno(id):
             return {"error": "Veneno no encontrado"}, 404
 
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {
             "veneno": veneno
@@ -561,8 +561,8 @@ def actualizar_veneno(id, data):
         fecha_creacion = data['fecha_creacion']
         ultima_actualizacion = data['ultima_actualizacion']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Actualizar veneno por ID
         cursor.execute("""
@@ -571,9 +571,9 @@ def actualizar_veneno(id, data):
             WHERE ID = %s
         """, (nombre, tipo, sintomas, usos, formula, fecha_creacion, ultima_actualizacion, id))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Veneno actualizado correctamente"}, 200
 
@@ -582,17 +582,17 @@ def actualizar_veneno(id, data):
 
 def eliminar_veneno(id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Eliminar veneno por ID
         cursor.execute("""
             DELETE FROM veneno WHERE ID = %s
         """, (id,))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Veneno eliminado correctamente"}, 200
 
@@ -610,8 +610,8 @@ def crear_publicacion(data):
         ultima_actualizacion = data['ultima_actualizacion']
         id_scorpion = data['ID_scorpion']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Insertar publicación
         cursor.execute("""
@@ -619,9 +619,9 @@ def crear_publicacion(data):
             VALUES (%s, %s, %s, %s, %s)
         """, (nombre, ruta, fecha_creacion, ultima_actualizacion, id_scorpion))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Publicación creada correctamente"}, 201
 
@@ -630,8 +630,8 @@ def crear_publicacion(data):
 
 def obtener_publicacion(id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        connection = pool.get_connection()
+        cursor = connection.cursor(dictionary=True)
         
         # Obtener publicación por ID
         cursor.execute("""
@@ -643,7 +643,7 @@ def obtener_publicacion(id):
             return {"error": "Publicación no encontrada"}, 404
 
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {
             "publicacion": publicacion
@@ -660,8 +660,8 @@ def actualizar_publicacion(id, data):
         ultima_actualizacion = data['ultima_actualizacion']
         id_scorpion = data['ID_scorpion']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Actualizar publicación por ID
         cursor.execute("""
@@ -670,9 +670,9 @@ def actualizar_publicacion(id, data):
             WHERE ID = %s
         """, (nombre, ruta, fecha_creacion, ultima_actualizacion, id_scorpion, id))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Publicación actualizada correctamente"}, 200
 
@@ -680,17 +680,17 @@ def actualizar_publicacion(id, data):
         return {"error": str(e)}, 500
 def eliminar_publicacion(id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connection = pool.get_connection()
+        cursor = connection.cursor()
 
         # Eliminar publicación por ID
         cursor.execute("""
             DELETE FROM publicacion WHERE ID = %s
         """, (id,))
 
-        conn.commit()
+        connection.commit()
         cursor.close()
-        conn.close()
+        connection.close()
 
         return {"message": "Publicación eliminada correctamente"}, 200
 
