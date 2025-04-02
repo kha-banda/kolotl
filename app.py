@@ -602,7 +602,6 @@ def delete_contact(id):
 
 # Ruta para visualizar estadísticas (ejemplo de gráficos con Plotly)
 @app.route('/Estadisticas')
-@login_required
 def estadisticas():
     x_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     y_data = [10, 15, 20, 12, 78, 30, 13, 34, 23, 56, 12, 89]

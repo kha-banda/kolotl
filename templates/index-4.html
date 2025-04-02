@@ -1,220 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layaut.html" %}
 
-<head>
-	<title>Contacto</title>
-	<meta charset="utf-8">
-	<meta name="format-detection" content="telephone=no" />
-	<link rel="icon" href="/static/images/favicon.ico">
-	<link rel="shortcut icon" href="/static/images/favicon.ico" />
-	<link rel="stylesheet" href="/static/css/form.css">
-	<link rel="stylesheet" href="/static/css/style.css">
-	<script src="/static/js/jquery.js"></script>
-	<script src="/static/js/jquery-migrate-1.2.1.js"></script>
-	<script src="/static/js/script.js"></script>
-	<script src="/static/js/superfish.js"></script>
-	<script src="/static/js/sForm.js"></script>
-	<script src="/static/js/jquery.ui.totop.js"></script>
-	<script src="/static/js/jquery.equalheights.js"></script>
-	<script src="/static/js/jquery.easing.1.3.js"></script>
-	<script>
-		$(document).ready(function () {
-			$().UItoTop({ easingType: 'easeOutQuart' });
-		});
-	</script>
-	<!--[if lt IE 8]>
-		<div style=' clear: both; text-align:center; position: relative;'>
-			<a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-			<img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
-			</a>
+{% block title %}Contacto{% endblock %}
+
+{% block header %}
+{% endblock %}
+<style>
+	.card img {
+		object-fit: cover;
+		height: 200px;
+	}
+	.card-text {
+		max-height: 60px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+</style>
+{% block content %}
+
+<div class="container py-5">
+	<div class="row g-4">
+		<div class="col-md-12 text-center">
+			<h2>Nos ubicamos en</h2>
+			<p><strong>Dirección:</strong> Carretera Teotitlán - San Antonio Nanahuatipán Km 1.7 s/n., Paraje Titlacuatitla, Teotitlán de Flores Magón, Oax., México, C.P. 68540</p>
+			<p><strong>Teléfono:</strong> +522363720712 | 236 11 32 32 1</p>
+			<p><strong>Correo electrónico:</strong> <a href="mailto:laboratorioDSI@unca.edu.mx">laboratorioDSI@unca.edu.mx</a></p>
 		</div>
-		<![endif]-->
-	<!--[if lt IE 9]>
-		<script src="js/html5shiv.js"></script>
-		<link rel="stylesheet" media="screen" href="css/ie.css">
-		<![endif]-->
-</head>
-
-<body class="" id="top">
-	<!--==============================header=================================-->
-	<header>
-		<div class="container_12">
-			<div class="grid_12">
-				<h1>
-					<a href="/">
-						<img src="/static/images/logo.png" alt="Registro de Alacranes">
-					</a>
-				</h1>
-				<div class="menu_block ">
-					<a href="#" class="donate">INGRESA</a>
-					<div class="clear"></div>
-					<nav class="horizontal-nav full-width horizontalNav-notprocessed">
-						<ul class="sf-menu">
-							<li><a href="/">Inicio</a></li>
-							<li><a href="/Estadisticas">Estadísticas</a></li>
-							<li><a href="/Galeria">Galería</a></li>
-
-							<li class="current"><a href="/Contacto">Contacto</a></li>
-						</ul>
-					</nav>
-					<div class="clear"></div>
-				</div>
-			</div>
-		</div>
-	</header>
-	<!--==============================Content=================================-->
-	<div class="content">
-		<div class="ic">More Website Templates @ TemplateMonster.com - March 24, 2014!</div>
-		<div class="container_12">
-			<div class="grid_12">
-				<h2>Nos ubicamos en</h2>
-				<div class="map">
-					<figure class="">
-						<iframe
-							src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3791.6131110558536!2d-97.10041891846247!3d18.13564903670845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1701308286706!5m2!1sen!2sus"
-							width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
-							referrerpolicy="no-referrer-when-downgrade"></iframe>
-					</figure>
-					<div class="grid_4 alpha">
-						<h2>Dirección:</h2>
-						<address>
-							<span class="fa fa-home"></span>
-							Carretera Teotitlán - San Antonio Nanahuatipán Km 1.7 s/n., Paraje Titlacuatitla.
-							Teotitlán de Flores Magón, Oax. México, C.P. 68540, 68540 <br>
-							Teotitlán de Flores Magón, Oax., Mexico. <br>
-						</address>
-					</div>
-					<div class="grid_4">
-						<h2>Teléfono:</h2>
-						<div class="m_phone">
-							<div class="fa fa-phone"></div>
-							+522363720712
-						</div>
-						<div class="m_phone">
-							<div class="fa fa-print"></div>
-							236 11 32 32 1
-						</div>
-					</div>
-					<div class="grid_4 omega">
-						<h2>Correo electrónico:</h2>
-						<a href="#"><span class="fa fa-envelope-o"></span> laboratorioDSI@unca.edu.mx</a>
-					</div>
-					<div class="clear"></div>
-				</div>
-
-				<h2> Colaboradores del Proyecto </h2>
-				<div class="grid_4 omega">
-					<h3>Dra. Mayra Herrera Martinez</h3>
-					Profesora-Investigadora del Instituto de Farmacobiología, Universidad de la Cañada, Reconocimiento
-					del Sismtea Nacional de Investigadores SNI 1.
-					<br>
-					<a href="https://scholar.google.es/citations?user=RepZ0I0AAAAJ&hl=es" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>Dr. Armando Ordáz Hernández</h3>
-					Profesor-Investigador del Instituto de Farmacobiología, Universidad de la Cañada, Reconocimiento
-					del Sismtea Nacional de Investigadores SNI 1.
-					<br>
-					<a href="https://scholar.google.com/citations?hl=es&user=4pGYnbMAAAAJ" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>Dr. Edmundo González Santillán</h3>
-					Profesor-Investigador, Universidad Autónoma de México, Curador y Responsable de la Colección Nacional de Arácnidos, reconocimiento
-					del Sismtea Nacional de Investigadores SNI 1.
-					<br>
-					<a href="https://scholar.google.com.mx/citations?user=sc5mWAQAAAAJ&hl=en" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>M. C. Beatriz Adriana Sabino Moxo </h3>
-					Profesora-Investigadora del Instituto Tecnología de los Alimentos, Universidad de la Cañada,
-					Reconocimiento
-					Perfil Deseable de PRODEP, miembro del Laboratorio de Investigación y Desarrollo de Software.
-					<br>
-					<a href="https://scholar.google.com/citations?user=--1J4s8AAAAJ&hl=es" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>M. C. Jose Alberto Márquez Domínguez </h3>
-					Profesor-Investigador del Instituto Tecnología de los Alimentos, Universidad de la Cañada,
-					Reconocimiento
-					Perfil Deseable de PRODEP, miembro del Laboratorio de Investigación y Desarrollo de Software.
-					<br>
-					<a href="https://scholar.google.com/citations?hl=es&user=ZtX_ZoAAAAAJ" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>José Manuel Sánchez Ruíz </h3>
-					Teléfono: 2381010925
-					<br>Correo: lqc_josemsr@unca.edu.mx
-					<br>Universidad de la Cañada
-					<br>
-					<br>
-					<br>
-					<a href="" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-				<div class="grid_4 omega">
-					<h3>Cinthya Lisseht López Navarro</h3>
-					Teléfono: ------
-					<br>Correo:  lisseht@ciencias.unam.mx
-					<br>Universidad Autónoma de México
-					<br>
-					<br>
-					<br>
-					<a href="" target="_blank"
-						class="btn">Acerca de</a>
-				</div>
-
-
-
-			</div>
+		<div class="col-md-6 mx-auto">
+			<iframe class="w-100" height="350" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3791.6131110558536!2d-97.10041891846247!3d18.13564903670845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1701308286706!5m2!1sen!2sus" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
 		</div>
 	</div>
-	<div class="bottom_block">
-		<div class="container_12">
-			<div class="grid_4 ">
-				<h3>Mantente informado</h3>
-				<div class="text1">Suscribete a nuestro correo</div>
-				<form id="newsletter">
-					<div class="rel">
-						<div class="success">La suscripción ha sido enviada</div>
-						<label class="email">
-							<input type="email" value="Enter your Email">
-							<span class="error">*Esta dirección de correo no es válida</span>
-						</label>
+	
+	<div class="mt-5">
+		<h2 class="text-center">Colaboradores del Proyecto</h2>
+		<div class="row g-4">
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Dra. Mayra Herrera Martinez</h5>
+						<p class="card-text">Profesora-Investigadora del Instituto de Farmacobiología, Universidad de la Cañada, SNI 1.</p>
+						<a href="https://scholar.google.es/citations?user=RepZ0I0AAAAJ&hl=es" target="_blank" class="btn btn-primary">Acerca de</a>
 					</div>
-					<a href="#" class="btn" data-type="submit">Enviar</a>
-				</form>
+				</div>
 			</div>
-			<div class="grid_5 prefix_3">
-				<h3>Mantente informado</h3>
-				<div class="text1">Síguenos en nuestras redes sociales </div>
-				En esta encontraras información referente a los eventos que se realizan.
-				<div class="socials">
-					<a href="http://twitter.com/#!/UNCA_SUNEO">
-						<div class="fa fa-twitter"></div>
-					</a>
-					<a href="http://www.facebook.com/pages/Universidad-de-la-Ca%C3%B1ada/282710531799277">
-						<div class="fa fa-facebook"></div>
-					</a>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Dr. Armando Ordáz Hernández</h5>
+						<p class="card-text">Profesor-Investigador del Instituto de Farmacobiología, Universidad de la Cañada, SNI 1.</p>
+						<a href="https://scholar.google.com/citations?hl=es&user=4pGYnbMAAAAJ" target="_blank" class="btn btn-primary">Acerca de</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Dr. Edmundo González Santillán</h5>
+						<p class="card-text">Profesor-Investigador, UNAM, Curador y Responsable de la Colección Nacional de Arácnidos, SNI 1.</p>
+						<a href="https://scholar.google.com.mx/citations?user=sc5mWAQAAAAJ&hl=en" target="_blank" class="btn btn-primary">Acerca de</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">M. C. Beatriz Adriana Sabino Moxo</h5>
+						<p class="card-text">Profesora-Investigadora del Instituto Tecnología de los Alimentos, Universidad de la Cañada, PRODEP.</p>
+						<a href="https://scholar.google.com/citations?user=--1J4s8AAAAJ&hl=es" target="_blank" class="btn btn-primary">Acerca de</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">M. C. Jose Alberto Márquez Domínguez</h5>
+						<p class="card-text">Profesor-Investigador del Instituto Tecnología de los Alimentos, Universidad de la Cañada, PRODEP.</p>
+						<a href="https://scholar.google.com/citations?hl=es&user=ZtX_ZoAAAAAJ" target="_blank" class="btn btn-primary">Acerca de</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">José Manuel Sánchez Ruíz</h5>
+						<p class="card-text">Teléfono: 2381010925 | Correo: <a href="mailto:lqc_josemsr@unca.edu.mx">lqc_josemsr@unca.edu.mx</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Cinthya Lisseht López Navarro</h5>
+						<p class="card-text">Teléfono: ------ | Correo: <a href="mailto:lisseht@ciencias.unam.mx">lisseht@ciencias.unam.mx</a></p>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<!--==============================footer=================================-->
-	<footer>
-		<div class="container_12">
-			<div class="grid_12">
-				<div class="copy">
-					Life &copy; 2014 | <a href="#">Privacy Policy</a> <br> Website designed by <a
-						href="http://www.templatemonster.com/" rel="nofollow">TemplateMonster.com </a>
-				</div>
-			</div>
-		</div>
-	</footer>
-</body>
+</div>
 
-</html>
+{% endblock %}

@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Generar contenido HTML dinámico para la tarjeta
                 const infoContent = `
                     <div class="capture-card" style="margin-bottom: 16px;">
-                        <img src="${capture.imagen || 'placeholder.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
+                        <img src="${capture.imagen || '/static/images/slide3.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
                         <h6 style="margin-bottom: 8px;">Datos de la Captura</h6>
                         <p><strong>Fecha:</strong> ${capture.fecha_captura}</p>
                         <p><strong>Especie:</strong> ${capture.genero} ${capture.especie}</p>
