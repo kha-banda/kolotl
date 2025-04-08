@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Mi Sitio Flask{% endblock %}</title>
+    <title>{% block title %} Información sobre Alacranes - Tipos, Hábitat y Prevención {% endblock %}             Información sobre Alacranes - Tipos, Hábitat y Prevención </title>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=yes" />
+    <meta name="description" content="Descubre todo sobre los alacranes: tipos, características, hábitat, prevención de picaduras y más. Información útil y verificada.">
+    <meta name="keywords" content="alacranes, escorpiones, picadura de alacrán, prevención, tipos de alacranes, hábitat, información sobre alacranes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta property="og:title" content="Kolotl Información sobre Alacranes en Mexico - Información útil y actualizada">
+    <meta property="og:description" content="Aprende sobre los alacranes, sus tipos, peligros, habitads y su distribución en el país.">
+    <meta property="og:image" content="/static/images/favicon.ico">
+    <meta property="og:url" content="https://Kolotl.site">
+    <meta property="og:type" content="website">
+  
+
+
     <link rel="icon" href="/static/images/favicon.ico">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -174,15 +188,16 @@
                         <li class="nav-item"><a class="nav-link" href="/capturas">Capturas</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
                         <li class="nav-item"><a class="nav-link" href="/scorpiones">Escorpiones</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/map">Mapa</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Mapa">Mapa</a></li>
                             <li class="nav-item">
                                 <span class="navbar-text">Hola,</span>
                             </li>
                             
                         {% else %}
                             <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/capturas">Capturas</a></li>
                             <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadísticas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Galeria">Galería</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Galeria_Escorpiones">Escorpiones</a></li>
                             <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
                             <li class="nav-item">
                                 <span class="navbar-text">Hola, {{ session['nombre'] }}</span>
@@ -194,8 +209,8 @@
                     {% else %}
                         <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/map">Mapa de capturas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Galeria">Escorpiones</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Mapa">Mapa de capturas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Galeria_Escorpiones">Escorpiones</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
                         <li class="nav-item">
                             <!-- Botón que abre el modal de inicio de sesión -->
@@ -211,7 +226,19 @@
 
     <!-- Contenido Principal -->
     <div class="container mt-4">
-        <main>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+              {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                  <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
+                {% else %}
+                  <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+                {% endif %}
+              {% endfor %}
+            </ol>
+          </nav>
+        <main >
             {% block content %}{% endblock %}
         </main>
     </div>

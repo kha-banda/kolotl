@@ -10,84 +10,149 @@
 {% endblock %}
 
 {% block content %}
-
-    <!-- Sección Slider con ajuste responsive -->
-<div id="sliderExample" class="carousel slide" data-ride="carousel">
-    <ol class="carousel-indicators">
-        <li data-target="#sliderExample" data-slide-to="0" class="active"></li>
-        <li data-target="#sliderExample" data-slide-to="1"></li>
-        <li data-target="#sliderExample" data-slide-to="2"></li>
-    </ol>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img src="/static/images/slide1.jpg" class="d-block w-100" alt="...">
-            <div class="carousel-caption bg-dark text-white p-2" style="opacity: 0;">
-                <h5>Especie - Familia <br> Hoffmannihadrura aztecus</h5>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <img src="/static/images/slide2.jpg" class="d-block w-100" alt="...">
-            <div class="carousel-caption bg-dark text-white p-2" style="opacity: 0;">
-                <h5>Especie - Familia <br> Centruroides baergi</h5>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <img src="/static/images/slide3.jpg" class="d-block w-100" alt="...">
-            <div class="carousel-caption bg-dark text-white p-2" style="opacity: 0;">
-                <h5>Especie - Familia <br> Hoffmannihadrura aztecus</h5>
-            </div>
-        </div>
+<div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel" style="z-index:20;">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
     </div>
-    <a class="carousel-control-prev" href="#sliderExample" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#sliderExample" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-    </a>
-</div>
-
-<script>
-// Mostrar el caption cuando se pasa el cursor sobre la imagen
-document.querySelectorAll('.carousel-item').forEach(item => {
-    const caption = item.querySelector('.carousel-caption');
-    const img = item.querySelector('img');
-
-    img.addEventListener('mouseover', () => {
-        caption.style.opacity = 1;
-    });
-
-    img.addEventListener('mouseout', () => {
-        caption.style.opacity = 0;
-    });
-
-    // Mostrar el caption al hacer clic en la imagen
-    img.addEventListener('click', () => {
-        caption.style.opacity = caption.style.opacity == 0 ? 1 : 0;
-    });
-});
-</script>
-
-    <!-- Sección de contenido principal con ajuste responsive -->
+  
+    <div class="carousel-inner">
+      <!-- Slide 1 -->
+      <div class="carousel-item active" data-bs-interval="10000">
+        <div class="container py-4">
+          <div class="row align-items-center">
+            <!-- Imagen -->
+            <div class="col-md-6 mb-3 mb-md-0">
+              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Alacrán en su hábitat">
+            </div>
+            <!-- Texto -->
+            <div class="col-md-6 d-flex flex-column justify-content-center">
+              <div class="p-3">
+                <h5>¿En qué sitios viven los alacranes?</h5>
+                <p>Descubre los aspectos más importantes sobre estos animales: su hábitad,datos estadisticos y mas.</p>
+                <a href="/Mapa" class="btn btn-primary">Ver Mapa</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Slide 2 -->
+      <div class="carousel-item" data-bs-interval="2000">
+        <div class="container py-4">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Tipos de alacranes">
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-center">
+              <div class="p-3">
+                <h5>Tipos de alacranes</h5>
+                <p>Conoce las especies más comunes donde se distribuyen y datos relevantes sosbre ellos.</p>
+                <a href="/Galeria_Escorpiones" class="btn btn-primary">Ver especies</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="carousel-item" data-bs-interval="2000">
+        <div class="container py-4">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Tipos de alacranes">
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-center">
+              <div class="p-3">
+                <h5>Las Investigacion es importante</h5>
+                <p>Conoce los datos relevantes sobre las capturas de los alacranes.</p>
+                <a href="/Estadisticas" class="btn btn-primary">Ver Estadisticas</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="carousel-item"  data-bs-interval="2000">
+        <div class="container py-4">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Cómo prevenir picaduras">
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-center">
+              <div class="p-3">
+                <h5>¿Quieres colaborar con nosotros?</h5>
+                <p>Unetenos solo rellena el formulario y en breve nos contactaremos contigo.</p>
+                <a href="#footer" class="btn btn-primary">Rellenar formulario</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+  </div>
+  
+  
     <div class="container py-5">
         <div class="row">
             <!-- Primera columna -->
+
+             <!-- Segunda columna -->
+             <div class="col-md-6 mb-4">
+              <h2>¿Quiénes somos?</h2>
+              <p>
+                <strong>Kolot</strong> es una colaboración académica entre el 
+                <strong>Grupo de Investigación Multidisciplinario para el Desarrollo de Productos Terapéuticos</strong>, 
+                el <strong>Laboratorio de Investigación y Desarrollo de Software</strong>, y el 
+                <strong>Cuerpo Académico Tecnología Computacional Aplicada</strong>.
+              </p>
+              <p>
+                El proyecto integra ciencia y tecnología para el estudio de alacranes, su captura controlada, 
+                recolección de veneno y análisis con fines terapéuticos. A través de un enfoque multidisciplinario, 
+                también se desarrollan herramientas digitales para el manejo, visualización y procesamiento de la información generada.
+              </p>
+              <p>
+                Kolot busca generar y divulgar información científica relevante que pueda ser útil para otros investigadores, 
+                instituciones académicas y centros de estudio enfocados en salud, biotecnología y ciencia aplicada.
+              </p>
+          </div>
+
+          <!-- Segunda columna -->
+          <div class="col-md-6 mb-4">
+              <h2>Misión </h2>
+              <p>Generar, organizar y divulgar conocimiento científico sobre el estudio del veneno de alacrán, integrando enfoques multidisciplinarios que vinculen la biotecnología, la salud y las tecnologías computacionales, con el fin de apoyar la investigación científica y el desarrollo de aplicaciones terapéuticas.</p>
+          </div>
+          <div class="col-md-6 mb-4">
+            <h2>vision</h2>
+            <p>Ser un referente Estatal y nacional en el estudio integral de alacranes y la generación de herramientas tecnológicas que contribuyan al desarrollo de productos terapéuticos y a la formación de redes de colaboración académica.</p>
+        </div>
+
+          <!-- Segunda columna -->
+          <div class="col-md-6 mb-4">
+              <h2>Laboratorio de Investigación y Desarrollo de Software</h2>
+              <img src="/static/images/page2_img1.jpg" alt="" class="img-fluid mb-3">
+              <p>Profesores-Investigadores que realizan investigación, además de desarrollar aplicaciones.</p>
+              <p>Laboratorio de Tecnologías de la Información</p>
+              <a href="#" class="btn btn-primary">Acerca de</a>
+          </div>
+
             <div class="col-md-6 mb-4">
                 <h2>Cuerpo Académico Tecnología Computacional Aplicada</h2>
                 <img src="/static/images/page1_img1.jpg" alt="" class="img-fluid mb-3">
                 <p>Profesores-Investigadores que desarrollan aplicaciones para las necesidades de la comunidad.</p>
                 <p>Instituto de Tecnología de los Alimentos</p>
                 <a href="https://www.unca.edu.mx/investigacion.html#ia" target="_blank" class="btn btn-primary">Acerca de</a>
-            </div>
-
-            <!-- Segunda columna -->
-            <div class="col-md-6 mb-4">
-                <h2>Laboratorio de Investigación y Desarrollo de Software</h2>
-                <img src="/static/images/page2_img1.jpg" alt="" class="img-fluid mb-3">
-                <p>Profesores-Investigadores que realizan investigación, además de desarrollar aplicaciones.</p>
-                <p>Laboratorio de Tecnologías de la Información</p>
-                <a href="#" class="btn btn-primary">Acerca de</a>
             </div>
 
             <!-- Tercera columna -->
@@ -98,6 +163,8 @@ document.querySelectorAll('.carousel-item').forEach(item => {
                 <p>Instituto de Farmacobiología</p>
                 <a href="https://www.unca.edu.mx/investigacion.html#ia" target="_blank" class="btn btn-primary">Acerca de</a>
             </div>
+            <!-- Segunda columna -->
+
         </div>
     </div>
 

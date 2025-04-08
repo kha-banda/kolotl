@@ -30,6 +30,38 @@ connection = mysql.connector.connect(
     database='scorpions'
 )
 
+from flask import request
+
+def build_breadcrumbs(path):
+    parts = path.strip('/').split('/')
+    breadcrumbs = []
+    url = ''
+    
+    for i, part in enumerate(parts):
+        url += '/' + part
+        # Solo es link si no es el último elemento
+        is_last = (i == len(parts) - 1)
+
+        if is_last:
+            # Agrega los parámetros GET como texto visible en el último breadcrumb
+            query_params = request.args.to_dict()
+            if query_params:
+                # Convierte dict a una cadena legible: familia=Buthidae, especie=Tityus
+                params_str = ', '.join(f'{k}={v}' for k, v in query_params.items())
+                part_display = f"{part.capitalize()} ({params_str})"
+            else:
+                part_display = part.capitalize()
+        else:
+            part_display = part.capitalize()
+
+        breadcrumbs.append({
+            'name': part_display,
+            'url': None if is_last else url
+        })
+
+    return breadcrumbs
+
+
 # Decorador para verificar si el usuario está autenticado
 def login_required(f):
     @wraps(f)
@@ -44,8 +76,10 @@ def login_required(f):
 
 @app.route('/')
 def Index():
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
     if 'loggedin' in session:
-        return render_template('index.html',session = session )
+        return render_template('index.html',session = session,breadcrumbs=breadcrumbs )
     else:
         return render_template('index.html')
 
@@ -56,11 +90,13 @@ def Index():
 @app.route('/Usuarios')
 @login_required  # Esto asegura que solo usuarios autenticados puedan acceder a esta ruta
 def users():
-     if 'loggedin' in session and session['rol'] == "admin":
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
+    if 'loggedin' in session and session['rol'] == "admin":
         
         usuarios = get_all_users()
-        return render_template('users.html',session = session,usuarios = usuarios )
-     else:
+        return render_template('users.html',session = session,usuarios = usuarios,breadcrumbs=breadcrumbs )
+    else:
         return redirect(url_for('Index'))
 
 # Ruta para crear un nuevo usuario
@@ -151,8 +187,9 @@ def capturas():
                 'nombre': row['nombre'],
             })
         cursor.close()
-
-        return render_template('capturas.html',session = session,scorpiones = scorpion_data,habitats = habitats )
+        path = request.path  # obtiene la ruta actual
+        breadcrumbs = build_breadcrumbs(path)
+        return render_template('capturas.html',session = session,scorpiones = scorpion_data,habitats = habitats ,breadcrumbs=breadcrumbs  )
     else:
         return render_template('index.html')
 
@@ -603,6 +640,8 @@ def delete_contact(id):
 # Ruta para visualizar estadísticas (ejemplo de gráficos con Plotly)
 @app.route('/Estadisticas')
 def estadisticas():
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
     x_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     y_data = [10, 15, 20, 12, 78, 30, 13, 34, 23, 56, 12, 89]
     trace = go.Scatter(x=x_data, y=y_data, mode='lines+markers', name='Datos Ejemplo')
@@ -624,16 +663,29 @@ def estadisticas():
         'Publica': [10, 40, 30, 4]
     }
 
-    return render_template('estadisticas.html', graphJSON=graph_json, graph2JSON=graph2_json, data_barras=data_barras)
+    return render_template('estadisticas.html', graphJSON=graph_json, graph2JSON=graph2_json, data_barras=data_barras,breadcrumbs=breadcrumbs )
 
 # Rutas adicionales de la página
-@app.route('/Galeria')
+@app.route('/Galeria_Escorpiones')
 def galeria():
-    return render_template('index-2.html')
+    path = request.path
+    breadcrumbs = build_breadcrumbs(path)
 
-@app.route('/map')
+    # Verifica si llegaron parámetros GET
+    if request.args:  # Esto verifica si hay al menos un parámetro
+        familia = request.args.get('familia')
+        especie = request.args.get('especie')
+        # Si no hay parámetros GET, muestra la galería base
+        return render_template('index-2.html', breadcrumbs=breadcrumbs)
+    else:
+        # Si no hay parámetros GET, muestra la galería base
+        return render_template('index-2.html', breadcrumbs=breadcrumbs)
+
+@app.route('/Mapa')
 def map():
-    return render_template('map.html')
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
+    return render_template('map.html',breadcrumbs = breadcrumbs)
 @app.route('/Acerca')
 def acerca():
     return render_template('index-3.html')
@@ -642,9 +694,11 @@ def acerca():
 @app.route('/scorpiones')
 @login_required  # Esto asegura que solo usuarios autenticados puedan acceder a esta ruta
 def scorpiones():
+     path = request.path  # obtiene la ruta actual
+     breadcrumbs = build_breadcrumbs(path)
      if 'loggedin' in session and session['rol'] == "admin":
         scorpion_data = get_all_scorpions()
-        return render_template('scorpions.html',scorpion_data = scorpion_data )
+        return render_template('scorpions.html',scorpion_data = scorpion_data,breadcrumbs = breadcrumbs )
      else:
         return redirect(url_for('Index'))
         
