@@ -23,7 +23,10 @@ app.secret_key = 'kolotl_unca'  # Necesario para gestionar sesiones
 # Tu API Key de OpenWeatherMap
 API_KEY = "ec66f746a0e14f57ac1152001242911"
 # Conexión a la base de datos MySQL usando mysql-connector
-connection = mysql.connector.connect(
+# Configuración del pool de conexiones
+pool = pooling.MySQLConnectionPool(
+    pool_name="mypool",
+    pool_size=5,
     host='69.62.71.171',
     user='root',
     password='caravanadestrucs',
@@ -121,18 +124,23 @@ def crear_usuario():
 @login_required
 def obtener_usuario(id):
     
-    cursor = connection.cursor(dictionary=True)
+    connection = pool.get_connection()
+    cursor = connection.cursor()
     cursor.execute('SELECT * FROM usuarios WHERE ID = %s', [id])
     usuario = cursor.fetchone()
-    
+    cursor.close()
+    connection.close()
     if usuario:
         return jsonify(usuario)
+   
     else:
         return jsonify({'error': 'Usuario no encontrado'}), 404
 # Ruta para actualizar un usuario existente
 @app.route('/actualizar_usuario/<int:id>', methods=['POST'])
 @login_required
 def actualizar_usuario(id):
+    connection = pool.get_connection()
+    cursor = connection.cursor()
     nombre = request.form['editar-nombre']
     apellido = request.form['editar-apellido']
     correo = request.form['editar-correo']
@@ -144,6 +152,8 @@ def actualizar_usuario(id):
         (nombre, apellido, correo, rol, id)
     )
     connection.commit()
+    cursor.close()
+    connection.close()
     if cursor.rowcount > 0:
         return jsonify({'success': True})
     return jsonify({'error': 'Usuario no encontrado'}), 404
@@ -151,9 +161,13 @@ def actualizar_usuario(id):
 @app.route('/eliminar_usuario/<int:id>', methods=['POST'])
 @login_required
 def eliminar_usuario(id):
+    connection = pool.get_connection()
+    cursor = connection.cursor()
     cursor = connection.cursor(dictionary=True)
     cursor.execute('DELETE FROM usuarios WHERE id = %s', [id])
     connection.commit()
+    cursor.close()
+    connection.close()
     if cursor.rowcount > 0:
         return jsonify({'success': True})
     return jsonify({'error': 'Usuario no encontrado'}), 404
@@ -164,6 +178,8 @@ def eliminar_usuario(id):
 @app.route('/capturas')
 def capturas():
     if 'loggedin' in session:
+        connection = pool.get_connection()
+        cursor = connection.cursor()
         cursor = connection.cursor(dictionary=True)
         cursor.execute('SELECT * FROM scorpions')
         scorpiones = cursor.fetchall()
@@ -187,6 +203,7 @@ def capturas():
                 'nombre': row['nombre'],
             })
         cursor.close()
+        connection.close()
         path = request.path  # obtiene la ruta actual
         breadcrumbs = build_breadcrumbs(path)
         return render_template('capturas.html',session = session,scorpiones = scorpion_data,habitats = habitats ,breadcrumbs=breadcrumbs  )
@@ -215,7 +232,7 @@ def submit_data():
     try:
       # Procesa la solicitud JSON
         import json
-
+        connection = pool.get_connection()
         data = request.get_json()
 
         # Sección de Ubicación
@@ -326,7 +343,8 @@ def submit_data():
         print(f"Registro insertado exitosamente con ID_coordenadas: {cursor.lastrowid}")
         print("Registro insertado exitosamente.")
 
-
+        cursor.close()
+        connection.close()
         return jsonify({'success': 'Datos guardados correctamente.'}), 200
     except Exception as e:
         print(f"Error al procesar los datos: {e}")
@@ -336,6 +354,7 @@ def submit_data():
 @login_required
 def actualizar_captura():
     try:
+        connection = pool.get_connection()
         # Obtener el ID de la captura que se desea actualizar
         captura_id = request.form.get('captura_id')
         
@@ -410,7 +429,8 @@ def actualizar_captura():
              latitud, longitud, notas, session['id'], id_locacion, habitat, id_scorpion, captura_id)
         )
         connection.commit()
-
+        cursor.close()
+        connection.close()
         return jsonify({'success': 'Datos actualizados correctamente.'}), 200
     except Exception as e:
         print(f"Error al procesar los datos: {e}")
@@ -432,6 +452,7 @@ def get_captures():
 @app.route('/get_captures_data', methods=['GET'])
 def get_captures_data():
     try:
+        connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)
         
         # Recuperar detalles de las capturas
@@ -499,7 +520,8 @@ def get_captures_data():
                 'species_family': species_family,
                 'species_genero': species_genero
             })
-
+        cursor.close()
+        connection.close()
         # Responder con las capturas y estadísticas
         return jsonify({
             'captures': captures,
@@ -579,6 +601,7 @@ def obtener_ubicacion_api():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        connection = pool.get_connection()
         # Obtén los datos del formulario
         email = request.form['email']
         password = request.form['password']
@@ -587,7 +610,8 @@ def login():
         cursor = connection.cursor(dictionary=True)
         cursor.execute('SELECT * FROM usuarios WHERE correo = %s AND contrasena = %s', (email, password))
         user = cursor.fetchone()
-        
+        cursor.close()
+        connection.close()
         if user:
             # Si el usuario es válido, guarda los datos en la sesión
             session['loggedin'] = True
@@ -619,21 +643,27 @@ def logout():
 @app.route('/add_contact', methods=['POST'])
 def add_contact():
     if request.method == 'POST':
+        connection = pool.get_connection()
         rol_var = request.form['ID']
         correo_var = request.form['Email']
         name_var = request.form['Nombre']
         cursor = connection.cursor()
         cursor.execute('INSERT INTO users (role_id, email, first_name) VALUES (%s, %s, %s)', (rol_var, correo_var, name_var))
         connection.commit()
+        cursor.close()
+        connection.close()
         flash('Contacto añadido exitosamente!', 'success')
         return redirect(url_for('Index'))
 
 # Ruta para eliminar un contacto (ejemplo de eliminación de la base de datos)
 @app.route('/delete_contact/<string:id>')
 def delete_contact(id):
+    connection = pool.get_connection()
     cursor = connection.cursor()
     cursor.execute('DELETE FROM users WHERE id = %s', (id,))
     connection.commit()
+    connection.close()
+    cursor.close()
     flash('Contacto eliminado exitosamente!', 'success')
     return redirect(url_for('Index'))
 
@@ -887,15 +917,6 @@ def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api, api_key_o
         return {"error": f"Ocurrió un error: {str(e)}"}
 
 
-# Configuración del pool de conexiones
-pool = pooling.MySQLConnectionPool(
-    pool_name="mypool",
-    pool_size=5,
-    host='69.62.71.171',
-    user='root',
-    password='caravanadestrucs',
-    database='scorpions'
-)
 
 
 def get_all_users():
