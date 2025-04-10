@@ -98,7 +98,7 @@ def users():
     if 'loggedin' in session and session['rol'] == "admin":
         
         usuarios = get_all_users()
-        return render_template('users.html',session = session,usuarios = usuarios,breadcrumbs=breadcrumbs )
+        return render_template('Users.html',session = session,usuarios = usuarios,breadcrumbs=breadcrumbs )
     else:
         return redirect(url_for('Index'))
 
