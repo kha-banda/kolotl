@@ -155,10 +155,33 @@
   border: 0;
   transition: all .2s ease;
 }
+.gallery img {
+        width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+.gallery {
+        column-count: 4;
+        column-gap: 1.25rem;
+    }
+@media (max-width: 768px) {
+        .gallery {
+            column-count: 2;
+        }
+    }
+@media (max-width: 576px) {
+        .gallery {
+            column-count: 1;
+        }
+    }
 
-
-
-        
+    .carousel-image {
+    object-fit: cover;
+    height: 400px; /* Ajusta la altura que deseas para las imágenes */
+  }
+  {% block stiles %}
+  {% endblock %}
     </style>
 </head>
 <body>
@@ -211,6 +234,7 @@
                         <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Mapa">Mapa de capturas</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Galeria_Escorpiones">Escorpiones</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Galeria_imagenes">Galeria de imagenes</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
                         <li class="nav-item">
                             <!-- Botón que abre el modal de inicio de sesión -->

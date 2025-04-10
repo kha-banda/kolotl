@@ -688,8 +688,14 @@ def map():
     return render_template('map.html',breadcrumbs = breadcrumbs)
 @app.route('/Acerca')
 def acerca():
-    return render_template('index-3.html')
-
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
+    return render_template('index-3.html',breadcrumbs = breadcrumbs)
+@app.route('/Galeria_imagenes')
+def galeria_imagenes():
+    path = request.path  # obtiene la ruta actual
+    breadcrumbs = build_breadcrumbs(path)
+    return render_template('galeria.html',breadcrumbs = breadcrumbs)
 
 @app.route('/scorpiones')
 @login_required  # Esto asegura que solo usuarios autenticados puedan acceder a esta ruta

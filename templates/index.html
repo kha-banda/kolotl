@@ -7,103 +7,105 @@
 
 {% block header %}
 
+
+  
 {% endblock %}
 
 {% block content %}
 <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel" style="z-index:20;">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
-      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
-      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
-    </div>
-  
-    <div class="carousel-inner">
-      <!-- Slide 1 -->
-      <div class="carousel-item active" data-bs-interval="10000">
-        <div class="container py-4">
-          <div class="row align-items-center">
-            <!-- Imagen -->
-            <div class="col-md-6 mb-3 mb-md-0">
-              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Alacrán en su hábitat">
-            </div>
-            <!-- Texto -->
-            <div class="col-md-6 d-flex flex-column justify-content-center">
-              <div class="p-3">
-                <h5>¿En qué sitios viven los alacranes?</h5>
-                <p>Descubre los aspectos más importantes sobre estos animales: su hábitad,datos estadisticos y mas.</p>
-                <a href="/Mapa" class="btn btn-primary">Ver Mapa</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Slide 2 -->
-      <div class="carousel-item" data-bs-interval="2000">
-        <div class="container py-4">
-          <div class="row align-items-center">
-            <div class="col-md-6 mb-3 mb-md-0">
-              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Tipos de alacranes">
-            </div>
-            <div class="col-md-6 d-flex flex-column justify-content-center">
-              <div class="p-3">
-                <h5>Tipos de alacranes</h5>
-                <p>Conoce las especies más comunes donde se distribuyen y datos relevantes sosbre ellos.</p>
-                <a href="/Galeria_Escorpiones" class="btn btn-primary">Ver especies</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Slide 2 -->
-      <div class="carousel-item" data-bs-interval="2000">
-        <div class="container py-4">
-          <div class="row align-items-center">
-            <div class="col-md-6 mb-3 mb-md-0">
-              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Tipos de alacranes">
-            </div>
-            <div class="col-md-6 d-flex flex-column justify-content-center">
-              <div class="p-3">
-                <h5>Las Investigacion es importante</h5>
-                <p>Conoce los datos relevantes sobre las capturas de los alacranes.</p>
-                <a href="/Estadisticas" class="btn btn-primary">Ver Estadisticas</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Slide 3 -->
-      <div class="carousel-item"  data-bs-interval="2000">
-        <div class="container py-4">
-          <div class="row align-items-center">
-            <div class="col-md-6 mb-3 mb-md-0">
-              <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Cómo prevenir picaduras">
-            </div>
-            <div class="col-md-6 d-flex flex-column justify-content-center">
-              <div class="p-3">
-                <h5>¿Quieres colaborar con nosotros?</h5>
-                <p>Unetenos solo rellena el formulario y en breve nos contactaremos contigo.</p>
-                <a href="#footer" class="btn btn-primary">Rellenar formulario</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Controles -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Siguiente</span>
-    </button>
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
   </div>
-  
-  
+
+  <div class="carousel-inner">
+    <!-- Slide 1 -->
+    <div class="carousel-item active" data-bs-interval="10000">
+      <div class="container py-4">
+        <div class="row align-items-center">
+          <!-- Imagen -->
+          <div class="col-md-6 mb-3 mb-md-0">
+            <img src="/static/images/slide3.jpg" class="d-block w-100 carousel-image" alt="Alacrán en su hábitat">
+          </div>
+          <!-- Texto -->
+          <div class="col-md-6 d-flex flex-column justify-content-center">
+            <div class="p-3">
+              <h5>¿En qué sitios viven los alacranes?</h5>
+              <p>Descubre los aspectos más importantes sobre estos animales: su hábitad,datos estadisticos y mas.</p>
+              <a href="/Mapa" class="btn btn-primary">Ver Mapa</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="carousel-item" data-bs-interval="2000">
+      <div class="container py-4">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <img src="/static/images/slide2.JPG" class="d-block w-100 carousel-image" alt="Tipos de alacranes">
+          </div>
+          <div class="col-md-6 d-flex flex-column justify-content-center">
+            <div class="p-3">
+              <h5>Tipos de alacranes</h5>
+              <p>Conoce las especies más comunes donde se distribuyen y datos relevantes sosbre ellos.</p>
+              <a href="/Galeria_Escorpiones" class="btn btn-primary">Ver especies</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="carousel-item" data-bs-interval="2000">
+      <div class="container py-4">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <img src="/static/images/ALAC2.png" class="d-block w-100 carousel-image" alt="Las Investigaciones son importantes">
+          </div>
+          <div class="col-md-6 d-flex flex-column justify-content-center">
+            <div class="p-3">
+              <h5>Las Investigaciones son importantes</h5>
+              <p>Conoce los datos relevantes sobre las capturas de los alacranes.</p>
+              <a href="/Estadisticas" class="btn btn-primary">Ver Estadísticas</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="carousel-item" data-bs-interval="2000">
+      <div class="container py-4">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <img src="/static/images/ALAC6.png" class="d-block w-100 carousel-image" alt="Cómo prevenir picaduras">
+          </div>
+          <div class="col-md-6 d-flex flex-column justify-content-center">
+            <div class="p-3">
+              <h5>¿Quieres colaborar con nosotros?</h5>
+              <p>Únete solo rellena el formulario y en breve nos contactaremos contigo.</p>
+              <a href="#footer" class="btn btn-primary">Rellenar formulario</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
+  </button>
+</div>
     <div class="container py-5">
         <div class="row">
             <!-- Primera columna -->
