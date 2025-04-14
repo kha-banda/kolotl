@@ -700,16 +700,14 @@ def estadisticas():
 def galeria():
     path = request.path
     breadcrumbs = build_breadcrumbs(path)
-
+    scorpion_data = get_all_scorpions()
     # Verifica si llegaron parámetros GET
     if request.args:  # Esto verifica si hay al menos un parámetro
-        familia = request.args.get('familia')
-        especie = request.args.get('especie')
         # Si no hay parámetros GET, muestra la galería base
         return render_template('index-2.html', breadcrumbs=breadcrumbs)
     else:
         # Si no hay parámetros GET, muestra la galería base
-        return render_template('index-2.html', breadcrumbs=breadcrumbs)
+        return render_template('index-2.html',scorpion_data = scorpion_data , breadcrumbs=breadcrumbs)
 
 @app.route('/Mapa')
 def map():

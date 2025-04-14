@@ -19,16 +19,27 @@
 {% block content %}
 <div class="container py-5">
 	<div class="row g-4">
+		{% for scorpion in scorpion_data %}
 		<div class="col-md-4">
-			<div class="card">
+			<div class="card" id="scorpion-{{scorpion.ID }}">
 				<img src="/static/images/page4_img1.jpg" class="card-img-top" alt="Centruroides baergi">
 				<div class="card-body text-center">
-					<h5 class="card-title">Centruroides baergi</h5>
-					<p class="card-text">Conocido como alacrán Oaxaqueño, encontrado en Oaxaca y Puebla.</p>
+					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
+					<p class="card-text">familia: {{ scorpion.familia }}</p>
+					<p class="card-text">{{ scorpion.descripcion }}</p>
 					<a href="/static/images/big1.jpg" target="_blank" class="btn btn-primary">Ver Imagen</a>
 				</div>
 			</div>
 		</div>
+        
+        {% else %}
+            <h2>No hay Scorpiones registrados</h2>
+        {% endfor %}
+
+
+
+
+		
 		<div class="col-md-4">
 			<div class="card">
 				<img src="/static/images/page4_img2.jpg" class="card-img-top" alt="Diplocentrus ochoterense">
