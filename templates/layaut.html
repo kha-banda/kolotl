@@ -186,6 +186,7 @@
 
 </head>
 <body>
+  {% set last_crumb = breadcrumbs[-1].name if breadcrumbs else '' %}
 
     <!-- Navbar principal -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -209,21 +210,21 @@
                 <ul class="navbar-nav me-auto d-flex align-items-end">
                     {% if session['loggedin'] %}
                         {% if session['rol'] == 'admin' %}
-                        <li class="nav-item active"><a class="nav-link" href="/Usuarios">Usuarios</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/capturas">Capturas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/scorpiones">Escorpiones</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Mapa">Mapa</a></li>
+                        <li class="nav-item {% if last_crumb == 'Usuarios' %}active{% endif %}"><a class="nav-link" href="/Usuarios">Usuarios</a></li>
+                        <li class="nav-item {% if last_crumb == 'Capturas' %}active{% endif %}"><a class="nav-link" href="/capturas">Capturas</a></li>
+                        <li class="nav-item {% if last_crumb == 'Estadisticas' %}active{% endif %}"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
+                        <li class="nav-item {% if last_crumb == 'Scorpiones' %}active{% endif %}"><a class="nav-link" href="/scorpiones">Escorpiones</a></li>
+                        <li class="nav-item {% if last_crumb == 'Mapa' %}active{% endif %}"><a class="nav-link" href="/Mapa">Mapa</a></li>
                             <li class="nav-item">
                                 <span class="navbar-text">Hola,</span>
                             </li>
                             
                         {% else %}
                             <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/capturas">Capturas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadísticas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Galeria_Escorpiones">Escorpiones</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
+                            <li class="nav-item"><a class="nav-link {% if last_crumb == 'Capturas' %}active{% endif %}" href="/capturas">Capturas</a></li>
+                            <li class="nav-item"><a class="nav-link {% if last_crumb == 'Estadisticas' %}active{% endif %}" href="/Estadisticas">Estadísticas</a></li>
+                            <li class="nav-item"><a class="nav-link {% if last_crumb == 'Galeria Escorpiones' %}active{% endif %}" href="/Galeria Escorpiones">Escorpiones</a></li>
+                            <li class="nav-item"><a class="nav-link {% if last_crumb == 'Contacto' %}active{% endif %}" href="/Contacto">Contacto</a></li>
                             <li class="nav-item">
                                 <span class="navbar-text">Hola, {{ session['nombre'] }}</span>
                             </li>
@@ -232,12 +233,12 @@
                             <a class="nav-link" href="/logout">Cerrar Sesión</a>
                         </li>
                     {% else %}
-                        <li class="nav-item active"><a class="nav-link" href="/">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Estadisticas">Estadisticas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Mapa">Mapa de capturas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Galeria_Escorpiones">Escorpiones</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Galeria_imagenes">Galeria de imagenes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Contacto">Contacto</a></li>
+                        <li class="nav-item {% if last_crumb == '' %}active{% endif %}"><a class="nav-link" href="/">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link {% if last_crumb == 'Estadisticas' %}active{% endif %}" href="/Estadisticas">Estadisticas</a></li>
+                        <li class="nav-item"><a class="nav-link {% if last_crumb == 'Mapa' %}active{% endif %}" href="/Mapa">Mapa de capturas</a></li>
+                        <li class="nav-item"><a class="nav-link {% if last_crumb == 'Galeria escorpiones' %}active{% endif %}" href="/Galeria Escorpiones">Escorpiones</a></li>
+                        <li class="nav-item"><a class="nav-link {% if last_crumb == 'Galeria_imagenes' %}active{% endif %}" href="/Galeria_imagenes">Galeria de imagenes</a></li>
+                        <li class="nav-item"><a class="nav-link {% if last_crumb == 'Contacto' %}active{% endif %}" href="/Contacto">Contacto</a></li>
                         <li class="nav-item">
                             <!-- Botón que abre el modal de inicio de sesión -->
                             <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#loginModal">
@@ -320,7 +321,8 @@
             </div>
         </div>
     </footer>
-    
+    <script async="async" data-cfasync="false" src="//pl26381354.profitableratecpm.com/c4081125e34c2a857c83fd31c3da21cf/invoke.js"></script>
+<div id="container-c4081125e34c2a857c83fd31c3da21cf"></div>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script type='text/javascript' src='//pl26381320.profitableratecpm.com/89/d1/50/89d150cafa9900c4e0d26cd551513611.js'></script>

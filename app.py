@@ -26,7 +26,7 @@ API_KEY = "ec66f746a0e14f57ac1152001242911"
 # Configuración del pool de conexiones
 pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
-    pool_size=5,
+    pool_size=25,
     host='69.62.71.171',
     user='root',
     password='caravanadestrucs',
@@ -42,27 +42,17 @@ def build_breadcrumbs(path):
     
     for i, part in enumerate(parts):
         url += '/' + part
-        # Solo es link si no es el último elemento
         is_last = (i == len(parts) - 1)
 
-        if is_last:
-            # Agrega los parámetros GET como texto visible en el último breadcrumb
-            query_params = request.args.to_dict()
-            if query_params:
-                # Convierte dict a una cadena legible: familia=Buthidae, especie=Tityus
-                params_str = ', '.join(f'{k}={v}' for k, v in query_params.items())
-                part_display = f"{part.capitalize()} ({params_str})"
-            else:
-                part_display = part.capitalize()
-        else:
-            part_display = part.capitalize()
-
+        part_display = part.capitalize()
+        
         breadcrumbs.append({
             'name': part_display,
             'url': None if is_last else url
         })
 
     return breadcrumbs
+
 
 
 # Decorador para verificar si el usuario está autenticado
@@ -441,8 +431,9 @@ def actualizar_captura():
 @app.route('/get_captures', methods=['GET'])
 def get_captures():
     try:
+        id_scorpion = request.args.get('id_scorpion')
         # Llama a la función y desestructura los datos y el código HTTP
-        data, status_code = obtener_todas_recolectas()
+        data, status_code = obtener_recolectas(id_scorpion) if id_scorpion else obtener_recolectas()
         return jsonify(data), status_code
     except Exception as e:
         print(f"Error retrieving captures: {e}")
@@ -452,25 +443,31 @@ def get_captures():
 @app.route('/get_captures_data', methods=['GET'])
 def get_captures_data():
     try:
+        id_scorpion = request.args.get('id_scorpion')  # Filtro opcional
+
         connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)
         
-        # Recuperar detalles de las capturas
-        cursor.execute("SELECT * FROM recolecta")
+        # Consulta base con filtro opcional
+        query = "SELECT * FROM recolecta"
+        params = ()
+
+        if id_scorpion:
+            query += " WHERE ID_scorpion = %s"
+            params = (id_scorpion,)
+        
+        cursor.execute(query, params)
         capturas = cursor.fetchall()
 
-        # Inicializar estadísticas
         total_captures = len(capturas)
         total_scorpions = sum(row['adultomacho'] + row['adultohembra'] + row['juvenilmacho'] + row['juvenilhembra']
                               + row['subadultomacho'] + row['subadultohembra'] for row in capturas)
         
         habitats_count = {}
         species_count = {}
-
         captures = []
 
         for row in capturas:
-            # Consultas optimizadas para obtener los datos relacionados con cada captura
             cursor.execute("""
                 SELECT 
                     habitat.nombre AS habitat_name,
@@ -490,7 +487,6 @@ def get_captures_data():
             """, (row['ID'],))
             result = cursor.fetchone()
 
-            # Asignar los valores recuperados
             habitat_name = result['habitat_name'] if result['habitat_name'] else 'Unknown'
             species_name = result['species_name'] if result['species_name'] else 'Unknown'
             species_family = result['species_family'] if result['species_family'] else 'Unknown'
@@ -498,11 +494,9 @@ def get_captures_data():
             locacion = {'estado': result['estado'], 'municipio': result['municipio']}
             persona = {'nombre': result['usuario_nombre'], 'apellido': result['usuario_apellido']}
 
-            # Contabilizar los hábitats y las especies
             habitats_count[habitat_name] = habitats_count.get(habitat_name, 0) + 1
             species_count[species_name] = species_count.get(species_name, 0) + 1
 
-            # Agregar la captura a la lista
             captures.append({
                 'ID': row['ID'],
                 'ID_usuario': row['ID_usuario'],
@@ -520,9 +514,10 @@ def get_captures_data():
                 'species_family': species_family,
                 'species_genero': species_genero
             })
+
         cursor.close()
         connection.close()
-        # Responder con las capturas y estadísticas
+
         return jsonify({
             'captures': captures,
             'statistics': {
@@ -536,8 +531,6 @@ def get_captures_data():
     except Exception as e:
         print(f"Error retrieving capture data: {e}")
         return jsonify({'error': 'Failed to retrieve capture data.'}), 500
-
-
 
 # Función para obtener la ubicación usando HERE.com
 def obtener_ubicacion(latitud, longitud):
@@ -696,7 +689,7 @@ def estadisticas():
     return render_template('estadisticas.html', graphJSON=graph_json, graph2JSON=graph2_json, data_barras=data_barras,breadcrumbs=breadcrumbs )
 
 # Rutas adicionales de la página
-@app.route('/Galeria_Escorpiones')
+@app.route('/Galeria Escorpiones')
 def galeria():
     path = request.path
     breadcrumbs = build_breadcrumbs(path)
@@ -708,6 +701,18 @@ def galeria():
     else:
         # Si no hay parámetros GET, muestra la galería base
         return render_template('index-2.html',scorpion_data = scorpion_data , breadcrumbs=breadcrumbs)
+@app.route('/Galeria Escorpiones/Escorpion/')
+def galeria_escorpion():
+    id_scorpion = request.args.get('id_scorpion')  # Filtro opcional
+    path = request.path
+
+    breadcrumbs = build_breadcrumbs(path)
+    scorpion_data = get_scorpion_by_id(id_scorpion)
+    breadcrumbs.append({
+            'name': scorpion_data['genero']+" "+ scorpion_data['especie'],
+            'url': None
+        })
+    return render_template('escorpion.html',scorpion_data=scorpion_data  , breadcrumbs=breadcrumbs)
 
 @app.route('/Mapa')
 def map():
@@ -789,6 +794,17 @@ def update_scorpion_endpoint(scorpion_id):
 @app.route('/Contacto')
 def contacto():
     return render_template('index-4.html')
+
+@app.route('/Articulos')
+@login_required 
+def articulos():
+     path = request.path  # obtiene la ruta actual
+     breadcrumbs = build_breadcrumbs(path)
+     if 'loggedin' in session and session['rol'] == "admin":
+        scorpion_data = get_all_scorpions()
+        return render_template('publicaciones_scorpiones.html',scorpion_data = scorpion_data,breadcrumbs = breadcrumbs )
+     else:
+        return redirect(url_for('Index'))
 
 
 def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api, api_key_openweather, hora=None):
@@ -1140,13 +1156,13 @@ def delete_scorpion(scorpion_id):
 
 
 
-def obtener_todas_recolectas():
+def obtener_recolectas(id_scorpion=None):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)
-        
-        # Obtener todas las recolectas con datos relacionados
-        cursor.execute("""
+
+        # Consulta base
+        query = """
             SELECT 
                 r.ID AS recolecta_id, 
                 s.ID AS scorpion_id,
@@ -1162,9 +1178,17 @@ def obtener_todas_recolectas():
             LEFT JOIN scorpions s ON r.ID_scorpion = s.ID
             LEFT JOIN habitat h ON r.ID_habitat = h.ID
             LEFT JOIN locacion l ON r.ID_locacion = l.ID
-        """)
+        """
+
+        # Agregar filtro si se proporciona un ID de escorpión
+        params = ()
+        if id_scorpion is not None:
+            query += " WHERE r.ID_scorpion = %s"
+            params = (id_scorpion,)
+
+        cursor.execute(query, params)
         recolectas = cursor.fetchall()
-        
+
         cursor.close()
         connection.close()
 
@@ -1172,6 +1196,9 @@ def obtener_todas_recolectas():
 
     except Exception as e:
         return {"error": str(e)}, 500
+    
+
+
 def obtener_recolectas_paginadas(pagina):
     try:
         # Validar que la página sea un número válido
@@ -1504,9 +1531,83 @@ def eliminar_veneno(id):
 
 
 
+def obtener_publicaciones_por_scorpion(id_scorpion):
+    try:
+        connection = pool.get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Obtener publicaciones ligadas al ID del escorpión
+        cursor.execute("""
+            SELECT p.*
+            FROM publicacion p
+            JOIN publicacion_scorpion ps ON p.ID = ps.ID_publicacion
+            WHERE ps.ID_scorpion = %s
+        """, (id_scorpion,))
+        
+        publicaciones = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        if not publicaciones:
+            return {"error": "No se encontraron publicaciones para este ID_scorpion"}, 404
+
+        return {"publicaciones": publicaciones}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+def actualizar_publicacion(id, data):
+    try:
+        nombre = data['nombre']
+        ruta = data['ruta']
+        fecha_creacion = data['fecha_creacion']
+        ultima_actualizacion = data['ultima_actualizacion']
+        id_scorpion = data['ID_scorpion']  # No usado aquí, pero puedes usarlo si quieres actualizar también la relación
+
+        connection = pool.get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE publicacion
+            SET nombre = %s, ruta = %s, fecha_creacion = %s, ultima_actualizacion = %s
+            WHERE ID = %s
+        """, (nombre, ruta, fecha_creacion, ultima_actualizacion, id))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return {"message": "Publicación actualizada correctamente"}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+def eliminar_publicacion(id):
+    try:
+        connection = pool.get_connection()
+        cursor = connection.cursor()
+
+        # Eliminar relación en la tabla intermedia
+        cursor.execute("""
+            DELETE FROM publicacion_scorpion WHERE ID_publicacion = %s
+        """, (id,))
+
+        # Eliminar la publicación
+        cursor.execute("""
+            DELETE FROM publicacion WHERE ID = %s
+        """, (id,))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return {"message": "Publicación y relación eliminadas correctamente"}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
 def crear_publicacion(data):
     try:
-        # Extraer datos
         nombre = data['nombre']
         ruta = data['ruta']
         fecha_creacion = data['fecha_creacion']
@@ -1518,84 +1619,24 @@ def crear_publicacion(data):
 
         # Insertar publicación
         cursor.execute("""
-            INSERT INTO publicacion (nombre, ruta, fecha_creacion, ultima_actualizacion, ID_scorpion)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (nombre, ruta, fecha_creacion, ultima_actualizacion, id_scorpion))
-
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-        return {"message": "Publicación creada correctamente"}, 201
-
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-def obtener_publicacion(id):
-    try:
-        connection = pool.get_connection()
-        cursor = connection.cursor(dictionary=True)
+            INSERT INTO publicacion (nombre, ruta, fecha_creacion, ultima_actualizacion)
+            VALUES (%s, %s, %s, %s)
+        """, (nombre, ruta, fecha_creacion, ultima_actualizacion))
         
-        # Obtener publicación por ID
+        # Obtener el ID de la nueva publicación
+        id_publicacion = cursor.lastrowid
+
+        # Insertar relación en tabla intermedia
         cursor.execute("""
-            SELECT * FROM publicacion WHERE ID = %s
-        """, (id,))
-        publicacion = cursor.fetchone()
-        
-        if not publicacion:
-            return {"error": "Publicación no encontrada"}, 404
-
-        cursor.close()
-        connection.close()
-
-        return {
-            "publicacion": publicacion
-        }, 200
-
-    except Exception as e:
-        return {"error": str(e)}, 500
-def actualizar_publicacion(id, data):
-    try:
-        # Extraer datos
-        nombre = data['nombre']
-        ruta = data['ruta']
-        fecha_creacion = data['fecha_creacion']
-        ultima_actualizacion = data['ultima_actualizacion']
-        id_scorpion = data['ID_scorpion']
-
-        connection = pool.get_connection()
-        cursor = connection.cursor()
-
-        # Actualizar publicación por ID
-        cursor.execute("""
-            UPDATE publicacion
-            SET nombre = %s, ruta = %s, fecha_creacion = %s, ultima_actualizacion = %s, ID_scorpion = %s
-            WHERE ID = %s
-        """, (nombre, ruta, fecha_creacion, ultima_actualizacion, id_scorpion, id))
+            INSERT INTO publicacion_scorpion (ID_scorpion, ID_publicacion)
+            VALUES (%s, %s)
+        """, (id_scorpion, id_publicacion))
 
         connection.commit()
         cursor.close()
         connection.close()
 
-        return {"message": "Publicación actualizada correctamente"}, 200
-
-    except Exception as e:
-        return {"error": str(e)}, 500
-def eliminar_publicacion(id):
-    try:
-        connection = pool.get_connection()
-        cursor = connection.cursor()
-
-        # Eliminar publicación por ID
-        cursor.execute("""
-            DELETE FROM publicacion WHERE ID = %s
-        """, (id,))
-
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-        return {"message": "Publicación eliminada correctamente"}, 200
+        return {"message": "Publicación creada y asociada correctamente"}, 201
 
     except Exception as e:
         return {"error": str(e)}, 500

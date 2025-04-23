@@ -1,0 +1,173 @@
+{% extends "layaut.html" %}
+
+{% block title %}Kolotl - Gestión de Usuarios{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Gestión de Articulos por escorpión</h1>
+
+    
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Familia:</label>
+            <select id="filtro-familia" class="form-control" onchange="filtrarGeneros()">
+                <option value="">Selecciona familia</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Género:</label>
+            <select id="filtro-genero" class="form-control" onchange="filtrarEspecies()">
+                <option value="">Selecciona género</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Especie:</label>
+            <select id="filtro-especie" class="form-control" onchange="seleccionarID()">
+                <option value="">Selecciona especie</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Campo oculto para guardar el ID seleccionado -->
+    <input type="hidden" id="scorpion-id-seleccionado" value="1">
+    
+
+    <!-- Tabla para listar usuarios -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Orden</th>
+                <th>Familia</th>
+                <th>Genero</th>
+                <th>Especie</th>
+                <th>descripcion</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usuario-table-body">
+            {% for scorpion in scorpion_data %}
+            <tr id="scorpion-{{scorpion.ID }}">
+                <td>{{ scorpion.ID }}</td>
+                <td>{{ scorpion.orden }}</td>
+                <td>{{ scorpion.familia }}</td>
+                <td>{{ scorpion.genero }}</td>
+                <td>{{ scorpion.especie }}</td>
+                <td>{{ scorpion.descripcion }}</td>
+                <td>
+                    <button class="btn btn-warning" onclick="editarUsuario('{{  scorpion.ID }}')">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarUsuario('{{  scorpion.ID }}')">Eliminar</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No hay usuarios registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel">Formulario de Datos de Escorpiones</h5>
+                <button type="button" id="formclose" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal_body">
+                <div id="section-1" class="form-section">
+                    <h5>Datos del Escorpión</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="orden" class="form-label">Orden</label>
+                            <input type="text" class="form-control" name="orden" id="orden" value="Scorpiones">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="familia" class="form-label">Familia</label>
+                            <input type="text" class="form-control" name="familia" id="familia" value="">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="genero" class="form-label">Género</label>
+                            <input type="text" class="form-control" name="genero" id="genero" value="">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="especie" class="form-label">Especie</label>
+                            <input type="text" class="form-control" name="especie" id="especie" value="">
+                        </div>
+                    </div>
+                    <div class="form-group mt-4">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion" id="descripcion" rows="3"></textarea>
+                    </div>
+
+                    <!-- Campo oculto para almacenar el ID del escorpión cuando se edite -->
+                    <input type="hidden" id="scorpionId">
+
+                    <button type="submit" class="btn btn-success mt-4" id="enviarDatos">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const datosEscorpiones = {{ scorpion_data | tojson }};
+
+    const familiaSelect = document.getElementById("filtro-familia");
+    const generoSelect = document.getElementById("filtro-genero");
+    const especieSelect = document.getElementById("filtro-especie");
+    const idSeleccionado = document.getElementById("scorpion-id-seleccionado");
+
+    function cargarFamilias() {
+        const familias = [...new Set(datosEscorpiones.map(s => s.familia))];
+        familias.forEach(fam => {
+            familiaSelect.innerHTML += `<option value="${fam}">${fam}</option>`;
+        });
+    }
+
+    function filtrarGeneros() {
+        generoSelect.innerHTML = `<option value="">Selecciona género</option>`;
+        especieSelect.innerHTML = `<option value="">Selecciona especie</option>`;
+        const familia = familiaSelect.value;
+        const generos = [...new Set(datosEscorpiones.filter(s => s.familia === familia).map(s => s.genero))];
+        generos.forEach(gen => {
+            generoSelect.innerHTML += `<option value="${gen}">${gen}</option>`;
+        });
+    }
+
+    function filtrarEspecies() {
+        especieSelect.innerHTML = `<option value="">Selecciona especie</option>`;
+        const familia = familiaSelect.value;
+        const genero = generoSelect.value;
+        const especies = datosEscorpiones.filter(s => s.familia === familia && s.genero === genero);
+        especies.forEach(esp => {
+            especieSelect.innerHTML += `<option value="${esp.especie}" data-id="${esp.ID}">${esp.especie}</option>`;
+        });
+    }
+
+    function seleccionarID() {
+        const selectedOption = especieSelect.options[especieSelect.selectedIndex];
+        const id = selectedOption.getAttribute("data-id");
+        idSeleccionado.value = id;
+        console.log("ID seleccionado:", id); // Puedes usarlo en otro script
+    }
+
+    window.onload = function () {
+        cargarFamilias();
+        idSeleccionado.value = 1; // Por defecto
+    };
+    let id = document.getElementById("scorpion-id-seleccionado").value;
+
+</script>
+
+
+
+{% endblock %}

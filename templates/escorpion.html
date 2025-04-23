@@ -1,0 +1,338 @@
+{% extends "layaut.html" %}
+
+{% block title %}Galeria{% endblock %}
+
+{% block header %}
+{% endblock %}
+<style>
+    #info-panel h5 {
+      font-weight: 600;
+      color: #174782;
+    }
+  
+    #info-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+  
+    #info-panel::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 4px;
+    }
+  
+    #map {
+      border: 2px solid #eee;
+    }
+  
+    @media (max-width: 768px) {
+      #info-panel {
+        width: 100%;
+        position: absolute;
+        height: 300px;
+        bottom: 0;
+        top: auto;
+        border-radius: 20px 20px 0 0;
+      }
+    }
+  </style>
+  
+
+{% block content %}
+<div class="container-fluid px-4 py-5">
+<!-- Sección Principal del Escorpión -->
+<div class="container mb-5">
+     <!-- Sección Principal del Escorpión -->
+  <div class="row g-4 align-items-center mb-5">
+    <!-- Imagen con efecto de fondo, se desliza hacia arriba -->
+    <div class="col-12 position-relative">
+      <img src="/static/images/page4_img1.jpg" alt="Centruroides baergi" class="img-fluid w-100 rounded shadow-lg" style="object-fit: cover; height: 400px;">
+      <div class="position-absolute top-50 start-50 translate-middle text-center text-white" style="z-index: 10;">
+        <h2 class="fw-bold">{{ scorpion_data.genero }} {{ scorpion_data.especie }}</h2>
+        <p><strong>Familia:</strong> {{ scorpion_data.familia }}</p>
+        <a href="/static/images/big1.jpg" target="_blank" class="btn btn-outline-light rounded-pill">Ver Imagen Grande</a>
+      </div>
+    </div>
+  </div>
+  
+    <!-- Contenido del blog -->
+    <div class="row">
+      <div class="col-12">
+        <h2 class="fw-bold">{{ scorpion_data.genero }} {{ scorpion_data.especie }}</h2>
+        <p class="mb-1"><strong>Familia:</strong> {{ scorpion_data.familia }}</p>
+        <p class="text-muted mb-3">{{ scorpion_data.descripcion }}</p>
+        <a href="/static/images/big1.jpg" target="_blank" class="btn btn-outline-primary rounded-pill">Ver Imagen Grande</a>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+    <!-- Estadísticas Globales -->
+<div class="mb-5">
+    <h3 class="text-center mb-4">Estadísticas Generales</h3>
+    <div class="row justify-content-center text-center">
+      <div class="col-6 col-md-3">
+        <div class="p-3 border rounded bg-light">
+          <h6>Total Capturas</h6>
+          <div id="totalCaptures" class="fs-3 fw-bold text-primary">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3 border rounded bg-light">
+          <h6>Total Escorpiones</h6>
+          <div id="totalScorpions" class="fs-3 fw-bold text-secondary">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+    <!-- Distribución de Capturas por Hábitat y Especie -->
+<div class="container mb-5">
+    
+    <div class="row justify-content-center">
+      <div class="col-md-4">
+        <h3 class="mb-3">Distribución de Capturas por Hábitat y Especie</h3>
+    <p>Visualiza cómo se distribuyen las capturas según el tipo de hábitat.</p>
+        <canvas id="habitatChart"></canvas>
+      </div>
+      <div class="col-md-4">
+        <h3 class="mb-3">Comparación de Capturas por Especie y Sexo</h3>
+        <p>Comparativa entre especímenes capturados según género.</p>
+        <canvas id="genderChart"></canvas>
+      </div>
+      <div class="col-md-4">
+        <h3 class="mb-3">Distribución de Estados de Desarrollo</h3>
+        <select id="speciesSelect" class="form-select mb-3 d-none">
+          <!-- Opciones dinámicas -->
+        </select>
+        <canvas id="spiderChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  
+    <!-- Mapa con Panel Informativo -->
+    <div class="position-relative mt-5" style="height: 600px;">
+        <h3 class="text-center mb-4">Mapa de capturas</h3>
+      <div id="map" class="w-100 h-100 border rounded shadow-sm"></div>
+  
+      <div id="info-panel"
+           class="position-absolute bg-white border-start shadow p-3"
+           style="left: 0; top: 0; bottom: 0; width: 300px; display: none; z-index: 1000; overflow-y: auto;">
+        <button id="close-panel" class="btn btn-sm btn-outline-danger float-end">✖</button>
+        <h5 class="mt-4">Detalles de la Captura</h5>
+        <div id="info-content"></div>
+      </div>
+    </div>
+  </div>
+  
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+            
+            
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const scorpionId = "{{ scorpion_data.ID }}";
+        fetch(`/get_captures_data?id_scorpion=${scorpionId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalCaptures').innerText = data.statistics.total_captures;
+                document.getElementById('totalScorpions').innerText = data.statistics.total_scorpions;
+                new Chart(document.getElementById('habitatChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(data.statistics.habitats_count),
+                        datasets: [{
+                            data: Object.values(data.statistics.habitats_count),
+                            backgroundColor: ['#4CAF50', '#FFC107', '#03A9F4', '#E91E63'],
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+
+                let totalMale = 0;
+                let totalFemale = 0;
+                data.captures.forEach(capture => {
+                    totalMale += capture.adultomacho + capture.juvenilmacho + capture.subadultomacho;
+                    totalFemale += capture.adultohembra + capture.juvenilhembra + capture.subadultohembra;
+                });
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Machos', 'Hembras'],
+                        datasets: [{
+                            label: 'Número de Especímenes',
+                            data: [totalMale, totalFemale],
+                            backgroundColor: ['#42A5F5', '#FF7043']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                const speciesSelect = document.getElementById('speciesSelect');
+                speciesSelect.add(new Option("Todas", "all"));
+                Object.keys(data.statistics.species_count).forEach(species => {
+                    speciesSelect.add(new Option(species, species));
+                });
+
+                let spiderChart;
+                function updateSpiderChart(species) {
+                    if (spiderChart) spiderChart.destroy();
+
+                    let totals = { adultomacho: 0, adultohembra: 0, juvenilmacho: 0, juvenilhembra: 0, subadultomacho: 0, subadultohembra: 0 };
+                    const filteredData = species === 'all' ? data.captures : data.captures.filter(capture => capture.escorpion === species);
+
+                    filteredData.forEach(capture => {
+                        totals.adultomacho += capture.adultomacho;
+                        totals.adultohembra += capture.adultohembra;
+                        totals.juvenilmacho += capture.juvenilmacho;
+                        totals.juvenilhembra += capture.juvenilhembra;
+                        totals.subadultomacho += capture.subadultomacho;
+                        totals.subadultohembra += capture.subadultohembra;
+                    });
+
+                    spiderChart = new Chart(document.getElementById('spiderChart'), {
+                        type: 'radar',
+                        data: {
+                            labels: ['Adultos Macho', 'Adultos Hembra', 'Juveniles Macho', 'Juveniles Hembra', 'Subadultos Macho', 'Subadultos Hembra'],
+                            datasets: [{
+                                label: `Distribución de ${species === 'all' ? 'Todas las Especies' : species}`,
+                                data: Object.values(totals),
+                                
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 3
+                            }]
+                        },
+                        options: {
+                        responsive: true,
+                        scales: {
+                            r: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.3)', // Grid color
+                                    lineWidth: 2 // Increase this value to make the grid lines thicker
+                                },
+                                angleLines: {
+                                    color: 'rgba(0, 0, 0, 0.3)', // Angle line color
+                                    lineWidth: 2 // Increase this value to make angle lines thicker
+                                },
+                                ticks: {
+                                    backdropColor: 'rgba(255, 255, 255, 0.1)' // Optional: Set a background color for scale labels
+                                }
+                            }
+                        }
+                    }
+                        
+                    });
+                }
+
+                speciesSelect.addEventListener('change', function () {
+                    updateSpiderChart(this.value);
+                });
+
+                updateSpiderChart("all");
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+		});
+    
+</script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById('close-panel').addEventListener('click', () => {
+    document.getElementById('info-panel').style.display = 'none';
+    });
+
+    var map = L.map('map').setView([17.0746, -96.7132], 8);
+
+    // Capas base
+    var normalLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps'
+    });
+
+    var hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps'
+    });
+
+    var baseMaps = {
+        "Normal": normalLayer,
+        "Satélite": satelliteLayer,
+        "Híbrido": hybridLayer,
+    };
+    L.control.layers(baseMaps).addTo(map);
+
+    // Función para generar un pequeño desplazamiento aleatorio
+    function getRandomOffset() {
+        const maxOffset = 0.005; // Ajusta este valor para el rango de desplazamiento (aprox. 500m)
+        return (Math.random() - 0.5) * maxOffset;
+    }
+
+    // Cargar datos de captura desde el endpoint
+    const scorpionId = "{{ scorpion_data.ID }}";
+    fetch(`/get_captures?id_scorpion=${scorpionId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.recolectas.forEach(capture => {
+
+
+                // Generar desplazamiento aleatorio para los marcadores
+                var offsetLat = getRandomOffset();
+                var offsetLng = getRandomOffset();
+
+                // Crear marcador con el desplazamiento
+                var marker = L.marker([capture.lat + offsetLat, capture.longitud + offsetLng]);
+                marker.on('click', () => {
+                // Generar contenido HTML dinámico para la tarjeta
+                const infoContent = `
+                    <div class="capture-card" style="margin-bottom: 16px;">
+                        <img src="${capture.imagen || '/static/images/slide3.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
+                        <h6 style="margin-bottom: 8px;">Datos de la Captura</h6>
+                        <p><strong>Fecha:</strong> ${capture.fecha_captura}</p>
+                        <p><strong>Especie:</strong> ${capture.genero} ${capture.especie}</p>
+                        <p><strong>Lugar:</strong> ${capture.estado}, ${capture.municipio}</p>
+                        <p><strong>Lat:</strong> ${capture.lat}</p>
+                        <p><strong>Long:</strong> ${capture.longitud}</p>
+                        <p><strong>Altura:</strong> ${capture.ALT}</p>
+                        <p><strong>Humedad:</strong> ${capture.humedad}</p>
+                        <p><strong>Hábitat:</strong> ${capture.nombre}</p>
+                        <p><strong>Notas:</strong> ${capture.notas}</p>
+                        <h6 style="margin-top: 12px;">Número de Especímenes</h6>
+                        <ul style="padding-left: 20px;">
+                            <li>Adultos Macho: ${capture.adultomacho}</li>
+                            <li>Adultos Hembra: ${capture.adultohembra}</li>
+                            <li>Juveniles Macho: ${capture.juvenilmacho}</li>
+                            <li>Juveniles Hembra: ${capture.juvenilhembra}</li>
+                            <li>Subadultos Macho: ${capture.subadultomacho}</li>
+                            <li>Subadultos Hembra: ${capture.subadultohembra}</li>
+                        </ul>
+                    </div>
+                `;
+
+                // Mostrar la tarjeta en el panel
+                document.getElementById('info-content').innerHTML = infoContent;
+                document.getElementById('info-panel').style.display = 'block';
+            });
+                // Crear círculo alrededor del marcador
+                var circle = L.circle([capture.lat + offsetLat, capture.longitud + offsetLng], {
+                    color: 'green',
+                    fillColor: 'green',
+                    fillOpacity: 0.1,
+                    radius: 1000 // Radio en metros (1 km)
+                });
+
+                // Añadir marcador y círculo al mapa
+                marker.addTo(map);
+                circle.addTo(map);
+            });
+        })
+        .catch(error => console.error('Error al cargar los datos de captura:', error));
+});
+</script>
+{% endblock %}
