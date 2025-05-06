@@ -15,6 +15,12 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	img {
+  max-width: 50%;
+  height: auto;
+  display: block;
+}
+
 </style>
 {% block content %}
 <div class="container py-5">
@@ -26,11 +32,6 @@
 				<div class="card-body text-center">
 					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
 					<p class="card-text">familia: {{ scorpion.familia }}</p>
-					{% if scorpion.descripcion %}
-					<p class="card-text">{{ scorpion.descripcion[:155] }}{% if scorpion.descripcion|length > 255 %}...{% endif %}</p>
-					{% else %}
-					<p class="card-text text-muted">Sin descripción disponible.</p>
-					{% endif %}
 
 					<a href="/Galeria%20Escorpiones/Escorpion/?id_scorpion={{scorpion.ID }}"  class="btn btn-primary">Ver Detalles</a>
 				</div>

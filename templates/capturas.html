@@ -6,7 +6,8 @@
 {% block title %}Kolotl{% endblock %}
 
 {% block header %}
-
+  
+ 
 {% endblock %}
 
 {% block content %}
@@ -147,6 +148,51 @@
                           </select>
                       </div>
                   </div>
+
+                  <div class="form-group mt-4">
+                    <label class="form-label">Selecciona tus imágenes</label>
+                    <div class="upload-zone">
+                      Haz clic para subir imágenes
+                      <input type="file" name="imagenes" id="imagenes" accept="image/*" multiple onchange="initSlider(event)">
+                    </div>
+                  
+                    <div class="preview-box" id="previewBox">
+                      <button class="nav-btn left" onclick="changeImage(-1)">‹</button>
+                      <img id="previewImage" src="" alt="Preview">
+                      <button class="nav-btn right" onclick="changeImage(1)">›</button>
+                    </div>
+                  </div>
+                  <script>
+                    let imageFiles = [];
+                    let currentIndex = 0;
+                  
+                    function initSlider(event) {
+                      const files = event.target.files;
+                      imageFiles = Array.from(files);
+                      if (imageFiles.length > 0) {
+                        currentIndex = 0;
+                        showImage(imageFiles[currentIndex]);
+                        document.getElementById('previewBox').style.display = 'block';
+                      }
+                    }
+                  
+                    function showImage(file) {
+                      const reader = new FileReader();
+                      reader.onload = function(e) {
+                        document.getElementById('previewImage').src = e.target.result;
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  
+                    function changeImage(direction) {
+                      if (imageFiles.length === 0) return;
+                      currentIndex += direction;
+                      if (currentIndex < 0) currentIndex = imageFiles.length - 1;
+                      if (currentIndex >= imageFiles.length) currentIndex = 0;
+                      showImage(imageFiles[currentIndex]);
+                    }
+                  </script>
+                  
 
                   <div class="form-group mt-4">
                       <label for="notas" class="form-label">Notas adicionales</label>

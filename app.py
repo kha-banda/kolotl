@@ -12,6 +12,10 @@ import requests
 from mysql.connector import pooling
 import os
 from flask import jsonify
+import os
+import uuid
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 app = Flask(__name__)
 
@@ -19,7 +23,7 @@ app = Flask(__name__)
 HERE_API_KEY = '1F91LCxBz_coxRzfxs5qybZKq0a-09Q40EyQMsP_ehA'
 OPEN_WEATHER_MAP = '0c92193205b8016c9c0cedc51ebd650b'
 app.secret_key = 'kolotl_unca'  # Necesario para gestionar sesiones
-
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 # Tu API Key de OpenWeatherMap
 API_KEY = "ec66f746a0e14f57ac1152001242911"
 # Conexión a la base de datos MySQL usando mysql-connector
@@ -33,7 +37,11 @@ pool = pooling.MySQLConnectionPool(
     database='scorpions'
 )
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 from flask import request
+# Crear la carpeta si no existe
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 def build_breadcrumbs(path):
     parts = path.strip('/').split('/')
@@ -768,15 +776,32 @@ def create_scorpion_endpoint():
         print(f"Error in endpoint: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/update_scorpion/<int:scorpion_id>', methods=['PUT'])
+@app.route('/update_scorpion/<int:scorpion_id>', methods=['PUT','POST'])
 def update_scorpion_endpoint(scorpion_id):
     try:
-        # Obtener los datos en formato JSON desde la solicitud
-        data = request.get_json()
-        
-        # Si no hay datos, respondemos con un error
+
+        # Si # Inicializamos un diccionario vacío para almacenar los datos
+        data = {}
+
+        # Acceder a los campos del formulario (campos de texto, select, etc.)
+        for key, value in request.form.items():
+            data[key] = value # no hay datos, respondemos con un error
+            print(data[key] )
         if not data:
             return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        if'imagen' in request.files and request.files['imagen'].filename != '':
+            imagen_final
+        else:
+            imagen_final = request.form.get('imagen_actual')
+
+        # Leer todos los archivos
+        for file_key, file in request.files.items():
+            if file and file.filename:  # Asegura que el archivo exista
+                filepath = guardar_multiples_imagenes([file], scorpion_id)
+                data[file_key] = ','.join(filepath)
+            else:
+                return jsonify({"success": False, "error": "no se cargo la imagen"}), 500
         
         # Llamamos a la función de actualización pasando el ID y los datos
         updated_scorpion_id = update_scorpion(scorpion_id, data)
@@ -789,6 +814,26 @@ def update_scorpion_endpoint(scorpion_id):
     except Exception as e:
         print(f"Error in update_scorpion_endpoint: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
+    
+@app.route('/delete_scorpioguardar_multiples_imagenesn/<int:scorpion_id>', methods=['DELETE'])
+def delete_scorpion_endpoint(scorpion_id):
+    try:
+        # Obtener los datos en formato JSON desde la solicitud
+        # Si no hay datos, respondemos con un error
+        if not scorpion_id:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        # Llamamos a la función de actualización pasando el ID y los datos
+        updated_scorpion_id = delete_scorpion(scorpion_id)
+
+        if updated_scorpion_id:
+            return jsonify({"success": True, "scorpion_id": updated_scorpion_id}), 200
+        else:
+            return jsonify({"success": False, "error": "Failed to update scorpion"}), 500
+
+    except Exception as e:
+        print(f"Error in update_scorpion_endpoint: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 
 @app.route('/Contacto')
@@ -932,6 +977,42 @@ def obtener_clima_fecha(latitud, longitud, fecha, api_key_weather_api, api_key_o
 
 
 
+def guardar_multiples_imagenes(imagenes, id_carpeta):
+    """
+    Guarda múltiples imágenes en una carpeta nombrada con el id_carpeta.
+    
+    Args:
+        imagenes (list[FileStorage]): lista de archivos de imagen recibidos del formulario.
+        id_carpeta (str or int): ID que nombra la carpeta donde guardar las imágenes.
+    
+    Returns:
+        list[str]: lista de rutas relativas donde se guardaron las imágenes.
+    """
+    rutas_relativas = []
+    
+    # Crear carpeta si no existe
+    ruta_carpeta = os.path.join(current_app.root_path, 'static/uploads', str(id_carpeta))
+    os.makedirs(ruta_carpeta, exist_ok=True)
+    
+    for imagen in imagenes:
+        # Obtener extensión segura
+        extension = os.path.splitext(secure_filename(imagen.filename))[1]
+        
+        # Generar nombre único
+        nombre_unico = f"{uuid.uuid4().hex}{extension}"
+        
+        # Ruta para guardar
+        ruta_imagen = os.path.join(ruta_carpeta, nombre_unico)
+        
+        # Guardar imagen
+        imagen.save(ruta_imagen)
+        
+        # Agregar ruta relativa
+        ruta_relativa = os.path.join('static/uploads', str(id_carpeta), nombre_unico)
+        rutas_relativas.append(ruta_relativa)
+    
+    return rutas_relativas
+
 
 def get_all_users():
     try:
@@ -1039,6 +1120,7 @@ def get_scorpion_by_id(scorpion_id):
         cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM scorpions WHERE ID = %s", (scorpion_id,))
         row = cursor.fetchone()
+        print(row)
         return row
     except Exception as e:
         print(f"Error fetching scorpion by ID: {e}")
@@ -1054,26 +1136,33 @@ def create_scorpion(data):
         cursor = connection.cursor()
         
         query = """
-        INSERT INTO scorpions (orden, familia, superfamilia, subfamilia, genero, especie, descripcion, ID_veneno, fecha_creacion, ultima_actualizacion)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+        INSERT INTO scorpions (
+            orden, familia, superfamilia, subfamilia, 
+            genero, subgenero, especie, descripcion, 
+            Foto, Veneno, tipo, sintomas, 
+            fecha_creacion, ultima_actualizacion
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
         """
         
-        # Usa `.get(clave, valor_por_defecto)` para manejar valores faltantes
+        # Ejecutar el insert con los datos proporcionados, usando .get() con valores por defecto
         cursor.execute(query, (
-            data.get('orden', ''), 
-            data.get('familia', ''), 
-            data.get('superfamilia', ''), 
-            data.get('subfamilia', ''), 
-            data.get('genero', ''), 
-            data.get('especie', ''), 
-            data.get('descripcion', ''),  # Si no existe, se guarda como vacío
-            data.get('ID_veneno', None)  # Si no existe, se guarda como NULL
+            data.get('orden', ''),
+            data.get('familia', ''),
+            data.get('superfamilia', ''),
+            data.get('subfamilia', ''),
+            data.get('genero', ''),
+            data.get('subgenero', ''),          # nuevo campo
+            data.get('especie', ''),
+            data.get('descripcion', None),      # puede ser NULL
+            data.get('Foto', None),              # puede ser NULL
+            data.get('veneno', ''),              # texto
+            data.get('tipo', ''),                # texto
+            data.get('sintomas', ''),            # texto
         ))
-
-        # Confirma la transacción
+        
         connection.commit()
 
-        # Devuelve el ID del último registro insertado
         return cursor.lastrowid
     
     except Exception as e:
@@ -1082,50 +1171,53 @@ def create_scorpion(data):
     
     finally:
         if cursor:
-            cursor.close()  # Cierra el cursor
+            cursor.close()
         if connection:
-            connection.close()  # Cierra la conexión
-
+            connection.close()
 
 
 def update_scorpion(scorpion_id, data):
     try:
-        # Obtener conexión a la base de datos
         connection = pool.get_connection()
         cursor = connection.cursor()
-
-        # Actualizar la consulta para modificar los valores del escorpión
+        print(data)
         query = """
         UPDATE scorpions 
-        SET orden = %s, 
+        SET 
+            orden = %s, 
             familia = %s, 
             superfamilia = %s, 
             subfamilia = %s, 
             genero = %s, 
+            subgenero = %s, 
             especie = %s, 
             descripcion = %s, 
-            ID_veneno = %s, 
+            Foto = %s, 
+            Veneno = %s, 
+            tipo = %s, 
+            sintomas = %s, 
             ultima_actualizacion = NOW()
-        WHERE id = %s
+        WHERE ID = %s
         """
-        
-        # Ejecutar la consulta con los datos proporcionados
+
         cursor.execute(query, (
             data.get('orden', ''),
             data.get('familia', ''),
             data.get('superfamilia', ''),
             data.get('subfamilia', ''),
             data.get('genero', ''),
+            data.get('subgenero', ''),
             data.get('especie', ''),
-            data.get('descripcion', ''),
-            data.get('ID_veneno', None),  # Si no existe, se guarda como NULL
+            data.get('descripcion', None),  # puede ser NULL
+            data.get('imagen', None),          # puede ser NULL
+            data.get('veneno', ''),
+            data.get('tipo', ''),
+            data.get('sintomas', ''),
             scorpion_id
         ))
 
-        # Confirmar la transacción
         connection.commit()
 
-        # Devolver el ID del escorpión actualizado
         return scorpion_id
 
     except Exception as e:
@@ -1134,9 +1226,10 @@ def update_scorpion(scorpion_id, data):
 
     finally:
         if cursor:
-            cursor.close()  # Cerrar el cursor
+            cursor.close()
         if connection:
-            connection.close()  # Cerrar la conexión
+            connection.close()
+
 
 
 
