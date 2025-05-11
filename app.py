@@ -696,19 +696,30 @@ def estadisticas():
 
     return render_template('estadisticas.html', graphJSON=graph_json, graph2JSON=graph2_json, data_barras=data_barras,breadcrumbs=breadcrumbs )
 
-# Rutas adicionales de la página
 @app.route('/Galeria Escorpiones')
 def galeria():
     path = request.path
     breadcrumbs = build_breadcrumbs(path)
-    scorpion_data = get_all_scorpions()
-    # Verifica si llegaron parámetros GET
-    if request.args:  # Esto verifica si hay al menos un parámetro
-        # Si no hay parámetros GET, muestra la galería base
-        return render_template('index-2.html', breadcrumbs=breadcrumbs)
-    else:
-        # Si no hay parámetros GET, muestra la galería base
-        return render_template('index-2.html',scorpion_data = scorpion_data , breadcrumbs=breadcrumbs)
+
+    # Obtener parámetros GET (si existen)
+    search_query = request.args.get('search', None)
+    page = int(request.args.get('page', 1))
+
+    # Obtener datos con búsqueda y paginación
+    data = get_all_scorpions(search_query=search_query, page=page)
+
+
+    return render_template(
+        'index-2.html',
+        breadcrumbs=breadcrumbs,
+        scorpion_data=data["results"],
+        total=data["total"],
+        current_page=data["page"],
+        total_pages=data["total_pages"],
+        pagination=data["total_pages"],
+        search=search_query
+    )
+
 @app.route('/Galeria Escorpiones/Escorpion/')
 def galeria_escorpion():
     id_scorpion = request.args.get('id_scorpion')  # Filtro opcional
@@ -741,11 +752,29 @@ def galeria_imagenes():
 @app.route('/scorpiones')
 @login_required  # Esto asegura que solo usuarios autenticados puedan acceder a esta ruta
 def scorpiones():
-     path = request.path  # obtiene la ruta actual
-     breadcrumbs = build_breadcrumbs(path)
      if 'loggedin' in session and session['rol'] == "admin":
-        scorpion_data = get_all_scorpions()
-        return render_template('scorpions.html',scorpion_data = scorpion_data,breadcrumbs = breadcrumbs )
+        path = request.path  # obtiene la ruta actual
+        breadcrumbs = build_breadcrumbs(path)
+
+        # Obtener parámetros GET (si existen)
+        search_query = request.args.get('search', None)
+        page = int(request.args.get('page', 1))
+
+        # Obtener datos con búsqueda y paginación
+        data = get_all_scorpions(search_query=search_query, page=page)
+
+
+        return render_template(
+            'scorpions.html',
+            breadcrumbs=breadcrumbs,
+            scorpion_data=data["results"],
+            total=data["total"],
+            current_page=data["page"],
+            total_pages=data["total_pages"],
+            pagination=data["total_pages"],
+            search=search_query
+        )
+            
      else:
         return redirect(url_for('Index'))
         
@@ -761,9 +790,27 @@ def get_scorpion(scorpion_id):
 @app.route('/create_scorpion', methods=['POST'])
 def create_scorpion_endpoint():
     try:
-        data = request.get_json()
+         # Si # Inicializamos un diccionario vacío para almacenar los datos
+        data = {}
+
+        # Acceder a los campos del formulario (campos de texto, select, etc.)
+        for key, value in request.form.items():
+            data[key] = value # no hay datos, respondemos con un error
+            print(data[key] )
         if not data:
-             return jsonify({"success": False, "error": "No data provided"}), 400
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        if'imagen' in request.files and request.files['imagen'].filename != '':
+
+            for file_key, file in request.files.items():
+                if file and file.filename:  # Asegura que el archivo exista
+                    filepath = guardar_multiples_imagenes([file], scorpion_id)
+                    data[file_key] = ','.join(filepath)
+                else:
+                    return jsonify({"success": False, "error": "no se cargo la imagen"}), 500
+        else:
+            data['imagen']= request.form.get('imagen_actual')
+        
 
         scorpion_id = create_scorpion(data)
 
@@ -791,17 +838,15 @@ def update_scorpion_endpoint(scorpion_id):
             return jsonify({"success": False, "error": "No data provided"}), 400
         
         if'imagen' in request.files and request.files['imagen'].filename != '':
-            imagen_final
-        else:
-            imagen_final = request.form.get('imagen_actual')
 
-        # Leer todos los archivos
-        for file_key, file in request.files.items():
-            if file and file.filename:  # Asegura que el archivo exista
-                filepath = guardar_multiples_imagenes([file], scorpion_id)
-                data[file_key] = ','.join(filepath)
-            else:
-                return jsonify({"success": False, "error": "no se cargo la imagen"}), 500
+            for file_key, file in request.files.items():
+                if file and file.filename:  # Asegura que el archivo exista
+                    filepath = guardar_multiples_imagenes([file], scorpion_id)
+                    data[file_key] = ','.join(filepath)
+                else:
+                    return jsonify({"success": False, "error": "no se cargo la imagen"}), 500
+        else:
+            data['imagen']= request.form.get('imagen_actual')
         
         # Llamamos a la función de actualización pasando el ID y los datos
         updated_scorpion_id = update_scorpion(scorpion_id, data)
@@ -1099,19 +1144,64 @@ def delete_user(user_id):
 
 
 
-def get_all_scorpions():
+def get_all_scorpions(search_query=None, page=1, page_size=6):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM scorpions")
+
+        # Obtener columnas de la tabla
+        cursor.execute("SHOW COLUMNS FROM scorpions")
+        columns = [row['Field'] for row in cursor.fetchall()]
+
+        base_query = "SELECT * FROM scorpions"
+        count_query = "SELECT COUNT(*) as total FROM scorpions"
+        values = []
+        count_values = []
+
+        # Búsqueda tipo buscador
+        if search_query:
+            search_query = f"%{search_query}%"
+            like_clauses = [f"{col} LIKE %s" for col in columns]
+            where_clause = " WHERE " + " OR ".join(like_clauses)
+            base_query += where_clause
+            count_query += where_clause
+            values.extend([search_query] * len(columns))
+            count_values.extend([search_query] * len(columns))
+
+        # Paginación
+        offset = (page - 1) * page_size
+        base_query += " LIMIT %s OFFSET %s"
+        values.extend([page_size, offset])
+
+        # Ejecutar consulta de datos
+        cursor.execute(base_query, tuple(values))
         rows = cursor.fetchall()
-        return rows
+
+        # Ejecutar consulta de conteo total
+        cursor.execute(count_query, tuple(count_values))
+        total = cursor.fetchone()['total']
+
+        return {
+            "results": rows,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size  # redondeo hacia arriba
+        }
+
     except Exception as e:
         print(f"Error fetching scorpions: {e}")
-        return []
+        return {
+            "results": [],
+            "total": 0,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": 0
+        }
     finally:
         cursor.close()
         connection.close()
+
 
 
 def get_scorpion_by_id(scorpion_id):

@@ -13,7 +13,29 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center">Gestión de Escorpiones</h1>
-
+		<form class="mb-4" role="search" method="get" action="/Galeria Escorpiones">
+  <div class="input-group">
+    <input type="search" 
+           class="form-control rounded-start-pill border-end-0" 
+           placeholder="Buscar escorpión..." 
+           aria-label="Buscar" 
+           name="search" 
+           value="{{ search or '' }}">
+    <button class="btn btn-outline-primary rounded-end-pill border-start-1" type="submit">
+      <i class="bi bi-search"></i>
+    </button>
+  </div>
+</form>
+{% if search and search|trim %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">
+      Resultados para: <strong>{{ search }}</strong>
+    </h3>
+    <a href="{{ url_for('galeria') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+      <i class="bi bi-x-lg"></i> Quitar filtro
+    </a>
+  </div>
+{% endif %}
     <!-- Botón para abrir el modal de nuevo escorpión -->
     <div class="d-flex justify-content-end mb-3">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModal">
@@ -30,10 +52,6 @@
                 <th>Familia</th>
                 <th>Género</th>
                 <th>Especie</th>
-                <th>Descripción</th>
-                <th>Veneno</th>
-                <th>Tipo</th>
-                <th>Síntomas</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -45,13 +63,6 @@
                 <td>{{ scorpion.familia }}</td>
                 <td>{{ scorpion.genero }}</td>
                 <td>{{ scorpion.especie }}</td>
-                {% if scorpion.descripcion %}
-                <td>{{ scorpion.descripcion[:155] |safe }}{% if scorpion.descripcion|length > 255 %}...{% endif %}</td>
-				{% else %}
-				{% endif %}
-                <td>{{ scorpion.Veneno }}</td>
-                <td>{{ scorpion.tipo }}</td>
-                <td>{{ scorpion.sintomas }}</td>
                 <td>
                     <button class="btn btn-warning" onclick="editarEscorpion('{{ scorpion.ID }}')">Editar</button>
                     <button class="btn btn-danger" onclick="eliminarEscorpion('{{ scorpion.ID }}')">Eliminar</button>
@@ -64,6 +75,33 @@
             {% endfor %}
         </tbody>
     </table>
+   <nav>
+  <ul class="pagination justify-content-center">
+    {% if current_page > 1 %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page - 1 }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link btn-outline-custom-navy">
+        Página {{ current_page }} de {{ total_pages }}
+      </span>
+    </li>
+
+    {% if current_page < total_pages %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page + 1 }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
 </div>
 
 <!-- Modal para crear o editar escorpión -->

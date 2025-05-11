@@ -24,11 +24,37 @@
 </style>
 {% block content %}
 <div class="container py-5">
+
+	<h1 class="text-center mb-4">Galería de Escorpiones</h1>
+	<form class="mb-4" role="search" method="get" action="/Galeria Escorpiones">
+  <div class="input-group">
+    <input type="search" 
+           class="form-control rounded-start-pill border-end-0" 
+           placeholder="Buscar escorpión..." 
+           aria-label="Buscar" 
+           name="search" 
+           value="{{ search or '' }}">
+    <button class="btn btn-outline-primary rounded-end-pill border-start-1" type="submit">
+      <i class="bi bi-search"></i>
+    </button>
+  </div>
+</form>
+{% if search and search|trim %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">
+      Resultados para: <strong>{{ search }}</strong>
+    </h3>
+    <a href="{{ url_for('galeria') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+      <i class="bi bi-x-lg"></i> Quitar filtro
+    </a>
+  </div>
+{% endif %}
+
 	<div class="row g-4">
 		{% for scorpion in scorpion_data %}
 		<div class="col-md-4">
 			<div class="card" id="scorpion-{{scorpion.ID }}">
-				<img src="/static/images/page4_img1.jpg" class="card-img-top" alt="Centruroides baergi">
+				<img src="{{ scorpion.Foto or '/static/images/page4_img1.jpg' }}"class="card-img-top" alt="{{ scorpion.genero }} {{ scorpion.especie }}">
 				<div class="card-body text-center">
 					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
 					<p class="card-text">familia: {{ scorpion.familia }}</p>
@@ -37,10 +63,37 @@
 				</div>
 			</div>
 		</div>
-        
+        <!-- Paginación -->
         {% else %}
-            <h2>No hay Scorpiones registrados</h2>
+            <h2>No hay Escorpiones encontrados/h2>
         {% endfor %}
+<nav>
+  <ul class="pagination justify-content-center">
+    {% if current_page > 1 %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page - 1 }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link btn-outline-custom-navy">
+        Página {{ current_page }} de {{ total_pages }}
+      </span>
+    </li>
+
+    {% if current_page < total_pages %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page + 1 }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
 
 
 {% endblock %}

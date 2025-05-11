@@ -45,11 +45,12 @@
   <div class="row g-4 align-items-center mb-5">
     <!-- Imagen con efecto de fondo, se desliza hacia arriba -->
     <div class="col-12 position-relative">
-      <img src="/static/images/page4_img1.jpg" alt="Centruroides baergi" class="img-fluid w-100 rounded shadow-lg" style="object-fit: cover; height: 400px;">
+      <img src="/{{ scorpion_data.Foto }}"
+      alt="{{ scorpion_data.genero }} {{ scorpion_data.especie }}" class="img-fluid w-100 rounded shadow-lg" style="object-fit: cover; height: 400px;">
       <div class="position-absolute top-50 start-50 translate-middle text-center text-white" style="z-index: 10;">
         <h2 class="fw-bold">{{ scorpion_data.genero }} {{ scorpion_data.especie }}</h2>
         <p><strong>Familia:</strong> {{ scorpion_data.familia }}</p>
-        <a href="/static/images/big1.jpg" target="_blank" class="btn btn-outline-light rounded-pill">Ver Imagen Grande</a>
+        <a href="/{{ scorpion_data.Foto }}" target="_blank" class="btn btn-outline-light rounded-pill">Ver Imagen Grande</a>
       </div>
     </div>
   </div>
@@ -60,7 +61,7 @@
         <h2 class="fw-bold">{{ scorpion_data.genero }} {{ scorpion_data.especie }}</h2>
         <p class="mb-1"><strong>Familia:</strong> {{ scorpion_data.familia }}</p>
         <p class="text-muted mb-3">{{ scorpion_data.descripcion | safe }}</p>
-        <a href="/static/images/big1.jpg" target="_blank" class="btn btn-outline-primary rounded-pill">Ver Imagen Grande</a>
+        <a href="/{{ scorpion_data.Foto }}"target="_blank" class="btn btn-outline-primary rounded-pill">Ver Imagen Grande</a>
       </div>
     </div>
   </div>
