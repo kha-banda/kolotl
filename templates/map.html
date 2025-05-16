@@ -51,7 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const maxOffset = 0.005; // Ajusta este valor para el rango de desplazamiento (aprox. 500m)
         return (Math.random() - 0.5) * maxOffset;
     }
-
+    const loadingOverlay = document.getElementById('loading-overlay');
+    loadingOverlay.style.display = 'flex'; // Mostrar el overlayMostrar el mensaje de carga
     // Cargar datos de captura desde el endpoint
     fetch('/get_captures')
         .then(response => response.json())
@@ -69,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Generar contenido HTML dinámico para la tarjeta
                 const infoContent = `
                     <div class="capture-card" style="margin-bottom: 16px;">
-                        <img src="${capture.imagen || '/static/images/slide3.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
+                        <img src="${capture.foto || '/static/images/slide3.jpg'}" alt="Imagen de la captura" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 8px;">
                         <h6 style="margin-bottom: 8px;">Datos de la Captura</h6>
                         <p><strong>Fecha:</strong> ${capture.fecha_captura}</p>
                         <p><strong>Especie:</strong> ${capture.genero} ${capture.especie}</p>
@@ -108,8 +109,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 marker.addTo(map);
                 circle.addTo(map);
             });
+            
+            loadingOverlay.style.display = 'none'; // Mostrar el overlayMostrar el mensaje de carga
         })
-        .catch(error => console.error('Error al cargar los datos de captura:', error));
+        .catch(error => {
+            loadingOverlay.style.display = 'none'; 
+            console.error('Error al cargar los datos de captura:', error)});
 });
 </script>
 {% endblock %}

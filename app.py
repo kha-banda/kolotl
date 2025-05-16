@@ -1144,7 +1144,7 @@ def delete_user(user_id):
 
 
 
-def get_all_scorpions(search_query=None, page=1, page_size=6):
+def get_all_scorpions(search_query=None, page=1, page_size=9):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)

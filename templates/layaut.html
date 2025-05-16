@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} Información sobre Alacranes - Tipos, Hábitat y Prevención {% endblock %}             Información sobre Alacranes - Tipos, Hábitat y Prevención </title>
+    <title>{% block title %}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="format-detection" content="telephone=yes" />
     <meta name="description" content="Descubre todo sobre los alacranes: tipos, características, hábitat, prevención de picaduras y más. Información útil y verificada.">
@@ -273,6 +273,46 @@
   .nav-btn.right {
     right: 10px;
   }
+
+  #btn-top {
+    z-index: 999;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    background-color: #fe5b29;
+    border: none;
+  }
+#loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+main {
+    position: relative;
+}
+
+
     </style>
     <script async defer src="https://analitycs.kolotl.site/script.js" data-website-id="b29239c9-2d8a-4ae8-89ce-50b82f20eb75"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -280,6 +320,7 @@
 </head>
 <body>
   {% set last_crumb = breadcrumbs[-1].name if breadcrumbs else '' %}
+   
 
     <!-- Navbar principal -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -347,6 +388,30 @@
     <!-- Contenido Principal -->
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
+        {% set path_segments = request.path.strip('/').split('/') %}
+        {% set is_home = request.path == '/' %}
+        {% set is_first_level = path_segments|length == 1 %}
+        {% set is_subpage = path_segments|length > 1 %}
+
+        {% if not is_home %}
+          {% if is_first_level %}
+            <a href="/" class="btn btn-secondary">
+              <span class="d-none d-sm-inline">← Volver a la página principal</span>
+              <span class="d-sm-none">←</span>
+            </a>
+          {% elif is_subpage %}
+            {% set parent_path = '/' + '/'.join(path_segments[:-1]) %}
+            <a href="{{ parent_path }}" class="btn btn-secondary">
+              <span class="d-none d-sm-inline">← Volver a la página anterior</span>
+              <span class="d-sm-none">←</span>
+            </a>
+          {% endif %}
+          {% endif %}
+
+
+
+
+
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="/">Inicio</a></li>
               {% for crumb in breadcrumbs %}
@@ -359,6 +424,10 @@
             </ol>
           </nav>
         <main >
+        <div id="loading-overlay">
+        <div class="spinner"></div>
+        </div>
+
             {% block content %}{% endblock %}
         </main>
     </div>
@@ -414,11 +483,37 @@
             </div>
         </div>
     </footer>
+    <button type="button" class="btn btn-primary btn-lg rounded-circle shadow position-fixed bottom-0 end-0 m-4 d-none" id="btn-top" aria-label="Volver arriba">
+      ↑
+    </button>
+
     <script async="async" data-cfasync="false" src="//pl26381354.profitableratecpm.com/c4081125e34c2a857c83fd31c3da21cf/invoke.js"></script>
 <div id="container-c4081125e34c2a857c83fd31c3da21cf"></div>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script type='text/javascript' src='//pl26381320.profitableratecpm.com/89/d1/50/89d150cafa9900c4e0d26cd551513611.js'></script>
+
+    <script>
+  const btnTop = document.getElementById("btn-top");
+
+  // Mostrar el botón después de cierto scroll
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+      btnTop.classList.remove("d-none");
+    } else {
+      btnTop.classList.add("d-none");
+    }
+  });
+
+  // Scroll suave al hacer clic
+  btnTop.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+</script>
+
   </body>
 
 </html>

@@ -1,6 +1,6 @@
 {% extends "layaut.html" %}
 
-{% block title %}Galeria{% endblock %}
+{% block title %}Escorpiones{% endblock %}
 
 {% block header %}
 {% endblock %}
@@ -49,7 +49,33 @@
     </a>
   </div>
 {% endif %}
+<nav>
+  <ul class="pagination justify-content-center">
+    {% if current_page > 1 %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page - 1 }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
 
+    <li class="page-item active">
+      <span class="page-link btn-outline-custom-navy">
+        Página {{ current_page }} de {{ total_pages }}
+      </span>
+    </li>
+
+    {% if current_page < total_pages %}
+      <li class="page-item">
+        <a class="page-link btn-outline-custom-navy" 
+           href="?{% if search and search|trim %}search={{ search }}&{% endif %}page={{ current_page + 1 }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
 	<div class="row g-4">
 		{% for scorpion in scorpion_data %}
 		<div class="col-md-4">

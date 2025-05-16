@@ -1,6 +1,6 @@
 {% extends "layaut.html" %}
 
-{% block title %}Kolotl - Gestión de Usuarios{% endblock %}
+{% block title %}Kolotl - Estadisticas Generales{% endblock %}
 
 {% block header %}{% endblock %}
 
@@ -102,6 +102,8 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.style.display = 'flex'; // Mostrar el overlayMostrar el mensaje de carga
         fetch('/get_captures_data')
             .then(response => response.json())
             .then(data => {
@@ -302,8 +304,9 @@
                 });
 
                 updateSpiderChart("all");
+                loadingOverlay.style.display = 'none';
             })
-            .catch(error => console.error('Error fetching data:', error));
+            .catch(error => {loadingOverlay.style.display = 'none';console.error('Error fetching data:', error)});
 
 		});
     
