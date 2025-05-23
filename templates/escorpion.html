@@ -60,7 +60,9 @@
       <div class="col-12">
         <h2 class="fw-bold">{{ scorpion_data.genero }} {{ scorpion_data.especie }}</h2>
         <p class="mb-1"><strong>Familia:</strong> {{ scorpion_data.familia }}</p>
-        <p class="text-muted mb-3">{{ scorpion_data.descripcion | safe }}</p>
+        <div class="descripcion-contenido text-muted mb-3">
+          {{ scorpion_data.descripcion | safe }}
+        </div>
         <a href="/{{ scorpion_data.Foto }}"target="_blank" class="btn btn-outline-primary rounded-pill">Ver Imagen Grande</a>
       </div>
     </div>

@@ -696,7 +696,7 @@ def estadisticas():
 
     return render_template('estadisticas.html', graphJSON=graph_json, graph2JSON=graph2_json, data_barras=data_barras,breadcrumbs=breadcrumbs )
 
-@app.route('/Galeria Escorpiones')
+@app.route('/Escorpiones')
 def galeria():
     path = request.path
     breadcrumbs = build_breadcrumbs(path)
@@ -720,7 +720,7 @@ def galeria():
         search=search_query
     )
 
-@app.route('/Galeria Escorpiones/Escorpion/')
+@app.route('/Escorpiones/Escorpion/')
 def galeria_escorpion():
     id_scorpion = request.args.get('id_scorpion')  # Filtro opcional
     path = request.path

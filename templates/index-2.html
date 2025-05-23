@@ -25,8 +25,8 @@
 {% block content %}
 <div class="container py-5">
 
-	<h1 class="text-center mb-4">Galería de Escorpiones</h1>
-	<form class="mb-4" role="search" method="get" action="/Galeria Escorpiones">
+	<h1 class="text-center mb-4">Escorpiones</h1>
+	<form class="mb-4" role="search" method="get" action="/Escorpiones">
   <div class="input-group">
     <input type="search" 
            class="form-control rounded-start-pill border-end-0" 
@@ -85,7 +85,7 @@
 					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
 					<p class="card-text">familia: {{ scorpion.familia }}</p>
 
-					<a href="/Galeria%20Escorpiones/Escorpion/?id_scorpion={{scorpion.ID }}"  class="btn btn-primary">Ver Detalles</a>
+					<a href="/Escorpiones/Escorpion/?id_scorpion={{scorpion.ID }}"  class="btn btn-primary">Ver Detalles</a>
 				</div>
 			</div>
 		</div>
