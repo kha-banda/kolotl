@@ -3,25 +3,9 @@
 {% block title %}Escorpiones{% endblock %}
 
 {% block header %}
+4
 {% endblock %}
-<style>
-	.card img {
-		object-fit: cover;
-		height: 200px;
-	}
-	.card-text {
-		max-height: 60px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	img {
-  max-width: 50%;
-  height: auto;
-  display: block;
-}
 
-</style>
 {% block content %}
 <div class="container py-5">
 
@@ -80,7 +64,12 @@
 		{% for scorpion in scorpion_data %}
 		<div class="col-md-4">
 			<div class="card" id="scorpion-{{scorpion.ID }}">
-				<img src="{{ scorpion.Foto or '/static/images/page4_img1.jpg' }}"class="card-img-top" alt="{{ scorpion.genero }} {{ scorpion.especie }}">
+				<img 
+  src="{{ scorpion.Foto or '/static/images/page4_img1.jpg' }}"
+  class="card-img-top"
+  alt="{{ scorpion.genero }} {{ scorpion.especie }}"
+  style="width:100%;height:180px;object-fit:cover;object-position:center;background-color:#f0f0f0;"
+>
 				<div class="card-body text-center">
 					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
 					<p class="card-text">familia: {{ scorpion.familia }}</p>
