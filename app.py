@@ -860,7 +860,7 @@ def update_scorpion_endpoint(scorpion_id):
         print(f"Error in update_scorpion_endpoint: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
     
-@app.route('/delete_scorpioguardar_multiples_imagenesn/<int:scorpion_id>', methods=['DELETE'])
+@app.route('/delete_scorpion/<int:scorpion_id>', methods=['DELETE'])
 def delete_scorpion_endpoint(scorpion_id):
     try:
         # Obtener los datos en formato JSON desde la solicitud
