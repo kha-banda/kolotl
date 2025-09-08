@@ -11,7 +11,7 @@
 
 	<h1 class="text-center mb-4">Escorpiones</h1>
 	<form class="mb-4" role="search" method="get" action="/Escorpiones">
-  <div class="input-group">
+  <div class="input-group mb-2">
     <input type="search" 
            class="form-control rounded-start-pill border-end-0" 
            placeholder="Buscar escorpión..." 
@@ -21,6 +21,32 @@
     <button class="btn btn-outline-primary rounded-end-pill border-start-1" type="submit">
       <i class="bi bi-search"></i>
     </button>
+  </div>
+  <div class="row g-2">
+    <div class="col-md-4">
+      <select class="form-select" name="familia">
+        <option value="">Todas las familias</option>
+        {% for f in familias %}
+          <option value="{{ f }}" {% if familia == f %}selected{% endif %}>{{ f }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" name="genero">
+        <option value="">Todos los géneros</option>
+        {% for g in generos %}
+          <option value="{{ g }}" {% if genero == g %}selected{% endif %}>{{ g }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" name="especie">
+        <option value="">Todas las especies</option>
+        {% for e in especies %}
+          <option value="{{ e }}" {% if especie == e %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </div>
 </form>
 {% if search and search|trim %}
@@ -71,8 +97,8 @@
   style="width:100%;height:180px;object-fit:cover;object-position:center;background-color:#f0f0f0;"
 >
 				<div class="card-body text-center">
-					<h5 class="card-title">{{ scorpion.genero }} {{ scorpion.especie }}</h5>
-					<p class="card-text">familia: {{ scorpion.familia }}</p>
+					<h5 class="card-title"> <i>{{ scorpion.genero }} {{ scorpion.especie }}</i></h5>
+					<p class="card-text">Familia: {{ scorpion.familia }}</p>
 
 					<a href="/Escorpiones/Escorpion/?id_scorpion={{scorpion.ID }}"  class="btn btn-primary">Ver Detalles</a>
 				</div>
@@ -80,7 +106,7 @@
 		</div>
         <!-- Paginación -->
         {% else %}
-            <h2>No hay Escorpiones encontrados/h2>
+            <h2>No hay Escorpiones encontrados</h2>
         {% endfor %}
 <nav>
   <ul class="pagination justify-content-center">
@@ -109,6 +135,47 @@
     {% endif %}
   </ul>
 </nav>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const familiaSelect = document.querySelector('select[name="familia"]');
+    const generoSelect = document.querySelector('select[name="genero"]');
+    const especieSelect = document.querySelector('select[name="especie"]');
 
+    familiaSelect.addEventListener('change', function() {
+        const familia = this.value;
+        generoSelect.innerHTML = '<option value="">Todos los géneros</option>';
+        especieSelect.innerHTML = '<option value="">Todas las especies</option>';
+        if (familia) {
+            fetch(`/get_generos?familia=${encodeURIComponent(familia)}`)
+                .then(res => res.json())
+                .then(generos => {
+                    generos.forEach(g => {
+                        const opt = document.createElement('option');
+                        opt.value = g;
+                        opt.textContent = g;
+                        generoSelect.appendChild(opt);
+                    });
+                });
+        }
+    });
+
+    generoSelect.addEventListener('change', function() {
+        const genero = this.value;
+        especieSelect.innerHTML = '<option value="">Todas las especies</option>';
+        if (genero) {
+            fetch(`/get_especies?genero=${encodeURIComponent(genero)}`)
+                .then(res => res.json())
+                .then(especies => {
+                    especies.forEach(e => {
+                        const opt = document.createElement('option');
+                        opt.value = e;
+                        opt.textContent = e;
+                        especieSelect.appendChild(opt);
+                    });
+                });
+        }
+    });
+});
+</script>
 
 {% endblock %}

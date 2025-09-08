@@ -703,11 +703,26 @@ def galeria():
 
     # Obtener parámetros GET (si existen)
     search_query = request.args.get('search', None)
+    familia = request.args.get('familia', None)
+    genero = request.args.get('genero', None)
+    especie = request.args.get('especie', None)
+    estado = request.args.get('estado', None)
+    municipio = request.args.get('municipio', None)
     page = int(request.args.get('page', 1))
 
     # Obtener datos con búsqueda y paginación
-    data = get_all_scorpions(search_query=search_query, page=page)
+    data = get_all_scorpions(
+        search_query=search_query,
+        familia=familia,
+        genero=genero,
+        especie=especie,
+        estado=estado,
+        municipio=municipio,
+        page=page
+    )
 
+    # Obtener filtros
+    filtros = get_scorpion_filters()
 
     return render_template(
         'index-2.html',
@@ -717,7 +732,17 @@ def galeria():
         current_page=data["page"],
         total_pages=data["total_pages"],
         pagination=data["total_pages"],
-        search=search_query
+        search=search_query,
+        familias=filtros["familias"],
+        generos=filtros["generos"],
+        especies=filtros["especies"],
+        estados=filtros["estados"],
+        municipios=filtros["municipios"],
+        familia=familia,
+        genero=genero,
+        especie=especie,
+        estado=estado,
+        municipio=municipio
     )
 
 @app.route('/Escorpiones/Escorpion/')
@@ -1144,7 +1169,11 @@ def delete_user(user_id):
 
 
 
-def get_all_scorpions(search_query=None, page=1, page_size=9):
+def get_all_scorpions(
+    search_query=None, page=1, page_size=9,
+    familia=None, genero=None, especie=None,
+    estado=None, municipio=None
+):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor(dictionary=True)
@@ -1153,20 +1182,61 @@ def get_all_scorpions(search_query=None, page=1, page_size=9):
         cursor.execute("SHOW COLUMNS FROM scorpions")
         columns = [row['Field'] for row in cursor.fetchall()]
 
-        base_query = "SELECT * FROM scorpions"
-        count_query = "SELECT COUNT(*) as total FROM scorpions"
+        # Base query con LEFT JOIN a capturas y locacion
+        base_query = """
+            SELECT DISTINCT s.*
+            FROM scorpions s
+            LEFT JOIN recolecta r ON s.ID = r.ID_scorpion
+            LEFT JOIN locacion l ON r.ID_locacion = l.ID
+        """
+        count_query = """
+            SELECT COUNT(DISTINCT s.ID) as total
+            FROM scorpions s
+            LEFT JOIN recolecta r ON s.ID = r.ID_scorpion
+            LEFT JOIN locacion l ON r.ID_locacion = l.ID
+        """
+
+        where_clauses = []
         values = []
         count_values = []
 
-        # Búsqueda tipo buscador
+        # Búsqueda general (en scorpions y locacion)
         if search_query:
-            search_query = f"%{search_query}%"
-            like_clauses = [f"{col} LIKE %s" for col in columns]
-            where_clause = " WHERE " + " OR ".join(like_clauses)
-            base_query += where_clause
-            count_query += where_clause
-            values.extend([search_query] * len(columns))
-            count_values.extend([search_query] * len(columns))
+            search_query_like = f"%{search_query}%"
+            like_clauses = [f"s.{col} LIKE %s" for col in columns]
+            like_clauses += ["l.estado LIKE %s", "l.municipio LIKE %s"]
+            where_clauses.append("(" + " OR ".join(like_clauses) + ")")
+            values.extend([search_query_like] * len(columns))
+            values.extend([search_query_like, search_query_like])
+            count_values = list(values)
+
+        # Filtros exactos
+        if familia:
+            where_clauses.append("s.familia = %s")
+            values.append(familia)
+            count_values.append(familia)
+        if genero:
+            where_clauses.append("s.genero = %s")
+            values.append(genero)
+            count_values.append(genero)
+        if especie:
+            where_clauses.append("s.especie = %s")
+            values.append(especie)
+            count_values.append(especie)
+        if estado:
+            where_clauses.append("l.estado = %s")
+            values.append(estado)
+            count_values.append(estado)
+        if municipio:
+            where_clauses.append("l.municipio = %s")
+            values.append(municipio)
+            count_values.append(municipio)
+
+        # Unir los WHERE
+        if where_clauses:
+            where_str = " WHERE " + " AND ".join(where_clauses)
+            base_query += where_str
+            count_query += where_str
 
         # Paginación
         offset = (page - 1) * page_size
@@ -1186,7 +1256,7 @@ def get_all_scorpions(search_query=None, page=1, page_size=9):
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size  # redondeo hacia arriba
+            "total_pages": (total + page_size - 1) // page_size
         }
 
     except Exception as e:
@@ -1823,6 +1893,71 @@ def crear_publicacion(data):
 
     except Exception as e:
         return {"error": str(e)}, 500
+
+def get_scorpion_filters():
+    try:
+        connection = pool.get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Familias, géneros y especies únicos
+        cursor.execute("SELECT DISTINCT familia FROM scorpions WHERE familia IS NOT NULL AND familia != ''")
+        familias = [row['familia'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT genero FROM scorpions WHERE genero IS NOT NULL AND genero != ''")
+        generos = [row['genero'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT especie FROM scorpions WHERE especie IS NOT NULL AND especie != ''")
+        especies = [row['especie'] for row in cursor.fetchall()]
+
+        # Estados y municipios únicos de capturas (locacion)
+        cursor.execute("SELECT DISTINCT estado FROM locacion WHERE estado IS NOT NULL AND estado != ''")
+        estados = [row['estado'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT municipio FROM locacion WHERE municipio IS NOT NULL AND municipio != ''")
+        municipios = [row['municipio'] for row in cursor.fetchall()]
+
+        cursor.close()
+        connection.close()
+
+        return {
+            "familias": familias,
+            "generos": generos,
+            "especies": especies,
+            "estados": estados,
+            "municipios": municipios
+        }
+    except Exception as e:
+        print(f"Error fetching filters: {e}")
+        return {
+            "familias": [],
+            "generos": [],
+            "especies": [],
+            "estados": [],
+            "municipios": []
+        }
+
+@app.route('/get_generos', methods=['GET'])
+def get_generos():
+    familia = request.args.get('familia')
+    connection = pool.get_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT DISTINCT genero FROM scorpions WHERE familia = %s AND genero IS NOT NULL AND genero != ''", (familia,))
+    generos = [row['genero'] for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+    return jsonify(generos)
+
+@app.route('/get_especies', methods=['GET'])
+def get_especies():
+    genero = request.args.get('genero')
+    connection = pool.get_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT DISTINCT especie FROM scorpions WHERE genero = %s AND especie IS NOT NULL AND especie != ''", (genero,))
+    especies = [row['especie'] for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+    return jsonify(especies)
+
 
 
 if __name__ == '__main__':
